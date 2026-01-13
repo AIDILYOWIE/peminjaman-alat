@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('log_aktivitas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('aksi')->comment('Contoh: Mengubah status pinjam ID #5');
+            $table->enum('action', ['CREATE', 'UPDATE', 'DELETE']);
+            $table->text('description');
             $table->timestamp('created_at')->useCurrent();
         });
     }

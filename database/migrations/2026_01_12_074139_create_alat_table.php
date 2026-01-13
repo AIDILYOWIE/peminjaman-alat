@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('alat', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
             $table->foreignId('kategori_id')->constrained('kategori');
-            $table->string('nama_alat');
-            $table->text('deskripsi');
-            $table->integer('stok')->comment('Berkurang otomatis via Trigger saat status = siap_diambil/dipinjam');
-            $table->string('gambar');
+            $table->string('name');
+            $table->text('description');
+            $table->integer('stock')->comment('Berkurang otomatis via Trigger saat status = siap_diambil/dipinjam');
+            $table->string('image');
             $table->timestamps();
         });
     }

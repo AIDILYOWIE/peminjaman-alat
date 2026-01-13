@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('peminjaman_id')->constrained('peminjaman');
             $table->foreignId('alat_id')->constrained('alat');
-            $table->integer('jumlah');
+            $table->integer('quantity');
             $table->timestamps();
         });
     }

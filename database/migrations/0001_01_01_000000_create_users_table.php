@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('username')->unique();
             $table->string('password');
-            $table->string('nama_lengkap');
             $table->string('no_induk')->nullable()->comment('NIS untuk Siswa, NIP untuk Guru');
             $table->enum('role', ['admin', 'petugas', 'peminjam']);
             $table->timestamps();
