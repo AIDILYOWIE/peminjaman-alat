@@ -1,9 +1,9 @@
-<footer class="bg-white border-t border-gray-200 mt-auto">
-    <div class="px-4 lg:px-8 py-6">
+<footer class="bg-white border-t border-gray-200 mt-auto sticky bottom-0 z-20">
+    <div class="px-4 lg:px-8 py-4">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-2">
-                <x-heroicon-o-cube class="w-6 h-6 text-indigo-600" />
-                <span class="text-sm font-bold text-gray-800 tracking-tight">Porto Alat</span>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-2 font-bold text-lg text-indigo-600">
+                <x-heroicon-o-beaker class="w-6 h-6" />
+                <span>InventApp</span>
             </div>
 
             <p class="text-sm text-gray-500">

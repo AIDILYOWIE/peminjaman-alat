@@ -11,18 +11,18 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50 text-gray-900 antialiased">
+<body class="bg-gray-50 text-gray-900 antialiased" x-data="{ sidebarCollapsed: false }">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         @include('components.navbar')
 
-        <!-- Main Content -->
-        <main class="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-h-screen relative overflow-x-hidden">
             <!-- Header -->
             @include('components.header')
 
             <!-- Page Content -->
-            <div class="p-4 lg:p-8 flex-1 bg-gray-50">
+            <main class="p-4 lg:p-8 flex-1 bg-gray-50">
                 @if(session('success'))
                 <div class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
                     <x-heroicon-o-check-circle class="w-5 h-5 flex-shrink-0" />
@@ -31,11 +31,11 @@
                 @endif
 
                 @yield('content')
-            </div>
+            </main>
 
             <!-- Footer -->
             @include('components.footer')
-        </main>
+        </div>
     </div>
     @stack('scripts')
 </body>
