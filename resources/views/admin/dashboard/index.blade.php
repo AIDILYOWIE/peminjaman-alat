@@ -69,9 +69,9 @@
     <div class="lg:col-span-3">
         @php
         $columns = [
-        ['label' => 'Peminjam', 'key' => 'user', 'component' => 'table-cells.info', 'map' => ['icon' => 'avatar']],
+        ['label' => 'Peminjam', 'key' => 'user', 'component' => 'info', 'map' => ['icon' => 'avatar']],
         ['label' => 'Alat', 'key' => 'item'],
-        ['label' => 'Status', 'key' => 'status', 'component' => 'table-cells.badge', 'map' => ['color' => 'color']],
+        ['label' => 'Status', 'key' => 'status', 'component' => 'badge', 'map' => ['color' => 'color']],
         ['label' => 'Tanggal', 'key' => 'date'],
         ];
 
@@ -93,11 +93,11 @@
     <div class="lg:col-span-3">
         @php
         $columns = [
-        ['label' => 'User', 'key' => 'user', 'component' => 'table-cells.info', 'map' => ['icon' => 'avatar']],
+        ['label' => 'User', 'key' => 'user', 'component' => 'info', 'map' => ['icon' => 'avatar']],
         [
         'label' => 'Aksi',
         'key' => 'action',
-        'component' => 'table-cells.badge',
+        'component' => 'badge',
         'map' => ['color' => 'color']
         ],
         ['label' => 'Deskripsi', 'key' => 'description'],

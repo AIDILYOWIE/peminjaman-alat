@@ -11,45 +11,53 @@
 'addButtonText' => null,
 'addButtonRoute' => null,
 'hasFilter' => false,
+'onRowClick' => null,
 ])
 
 <div class="space-y-4">
     {{-- Header / Action Bar --}}
     @if($searchPlaceholder || $addButtonRoute || $title || isset($headerActions))
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center sm:gap-4 gap-3">
         @if($title)
         <h2 class="{{ $titleClass }} font-bold text-gray-800">{{ $title }}</h2>
         @endif
 
-        @if($searchPlaceholder)
-        <div class="relative w-full sm:w-96">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <x-heroicon-o-magnifying-glass class="h-5 w-5 text-gray-400" />
+        <div class="flex flex-col-reverse sm:flex-row items-end sm:items-center gap-3 w-full sm:w-auto">
+            @if($searchPlaceholder)
+            <div class="relative w-full sm:w-96">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <x-heroicon-o-magnifying-glass class="sm:h-5 sm:w-5 h-4 w-4 text-gray-400" />
+                </div>
+                <input type="text"
+                    class="block w-full pl-10 pr-3 sm:py-2.5 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-[14px] sm:text-sm transition-shadow shadow-sm"
+                    placeholder="{{ $searchPlaceholder }}">
             </div>
-            <input type="text"
-                class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow shadow-sm"
-                placeholder="{{ $searchPlaceholder }}">
-        </div>
-        @endif
-
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-            @if($hasFilter)
-            <button class="inline-flex items-center px-4 py-2.5 border border-gray-200 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                <x-heroicon-o-funnel class="-ml-1 mr-2 h-5 w-5 text-gray-500" />
-                Filter
-            </button>
             @endif
 
-            @if($addButtonRoute)
-            <a href="{{ $addButtonRoute }}" class="inline-flex items-center px-4 py-2.5 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                <x-heroicon-o-plus class="-ml-1 mr-2 h-5 w-5" />
-                {{ $addButtonText ?? 'Tambah Data' }}
-            </a>
-            @endif
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                @if($hasFilter)
+                <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-200 shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                    <x-heroicon-o-funnel class="sm:h-5 sm:w-5 h-4 w-4 text-gray-500" />
+                    Filter
+                </button>
+                @endif
 
-            @if(isset($headerActions))
-            {{ $headerActions }}
-            @endif
+                @if($addButtonRoute)
+                <a href="{{ $addButtonRoute }}"
+                    class="fixed bottom-6 right-6 z-40 sm:static flex items-center p-2 justify-center sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 border border-transparent shadow-2xl sm:shadow-sm text-sm font-medium rounded-full sm:rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-300 group">
+                    <x-heroicon-o-plus class="h-7 w-7 sm:h-5 sm:w-5" />
+                    <span class="hidden sm:inline">{{ $addButtonText ?? 'Tambah Data' }}</span>
+                    <!-- Mobile Tooltip/Label (Optional, but good for UX) -->
+                    <span class="absolute right-16 bg-gray-900 text-white text-[10px] px-2 py-1 rounded lg:hidden opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                        {{ $addButtonText ?? 'Tambah Data' }}
+                    </span>
+                </a>
+                @endif
+
+                @if(isset($headerActions))
+                {{ $headerActions }}
+                @endif
+            </div>
         </div>
     </div>
     @endif
@@ -58,14 +66,14 @@
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-gray-600">
-                <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500">
+                <thead class="bg-gray-50 sm:text-xs text-[12px] uppercase font-semibold text-gray-500">
                     <tr>
                         @foreach($columns as $column)
                         @php
                         $visibilityClass = isset($column['hidden']) ? $column['hidden'] . ' ' : '';
                         $headerClass = $visibilityClass . ($column['class'] ?? '');
                         @endphp
-                        <th class="px-6 py-4 {{ $headerClass }}">
+                        <th class="px-6 py-4 {{ $headerClass }} {{ $column['align'] ?? 'text-left' }}">
                             {{ $column['label'] }}
                         </th>
                         @endforeach
@@ -79,7 +87,9 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($rows as $row)
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr
+                        class="hover:bg-gray-50 transition-colors {{ $onRowClick ? 'cursor-pointer' : '' }}"
+                        @if($onRowClick) @click="{{ str_replace('$row', 'JSON.parse(\''.addslashes(json_encode($row)).'\')', $onRowClick) }}" @endif>
                         @foreach($columns as $column)
                         @php
                         $visibilityClass = isset($column['hidden']) ? $column['hidden'] . ' ' : '';
@@ -89,9 +99,21 @@
                         $cellValue = $dataKey ? data_get($row, $dataKey) : null;
 
                         $componentName = $column['component'] ?? null;
-                        $isRawTag = $componentName && !str_contains($componentName, '.') && !str_starts_with($componentName, 'heroicon-');
+
+                        // Smart component detection:
+                        // 1. If it contains a dot, it's likely a view-based component or manual path
+                        // 2. If it starts with heroicon-, it's an icon component
+                        // 3. If it exists as a standalone view OR in the components folder
+                        $isComponent = $componentName && (
+                        str_contains($componentName, '.') ||
+                        str_starts_with($componentName, 'heroicon-') ||
+                        view()->exists($componentName) ||
+                        view()->exists("components.$componentName")
+                        );
+
+                        $isRawTag = $componentName && !$isComponent;
                         @endphp
-                        <td class="px-6 py-4 {{ $rowClass }}">
+                        <td class="px-6 py-4 {{ $rowClass }} {{ $column['align'] ?? 'text-left' }}">
                             @if($componentName)
                             @php
                             $cellParams = ['value' => $cellValue];
