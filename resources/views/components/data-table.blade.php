@@ -6,6 +6,7 @@
 'routePrefix' => null, // e.g. 'admin.items'
 'paginated' => false,
 'title' => null,
+'titleClass' => null,
 'searchPlaceholder' => null,
 'addButtonText' => null,
 'addButtonRoute' => null,

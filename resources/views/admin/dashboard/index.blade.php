@@ -65,56 +65,58 @@
 
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Recent Activity / Items Table -->
-    <div class="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-            <h2 class="text-lg font-bold text-gray-800">Aktivitas Peminjam</h2>
-            <button class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">Lihat Semua</button>
-        </div>
-
+    <!-- Aktivitas Peminjam Table -->
+    <div class="lg:col-span-3">
         @php
         $columns = [
-        ['label' => 'Peminjam', 'key' => 'user', 'type' => 'avatar'],
-        ['label' => 'Alat', 'key' => 'item', 'type' => 'text'],
-        ['label' => 'Status', 'key' => 'status', 'type' => 'badge', 'badge_color_key' => 'color'],
-        ['label' => 'Tanggal', 'key' => 'date', 'type' => 'date'],
+        ['label' => 'Peminjam', 'key' => 'user', 'component' => 'table-cells.info', 'map' => ['icon' => 'avatar']],
+        ['label' => 'Alat', 'key' => 'item'],
+        ['label' => 'Status', 'key' => 'status', 'component' => 'table-cells.badge', 'map' => ['color' => 'color']],
+        ['label' => 'Tanggal', 'key' => 'date'],
         ];
 
-        $activities = [
-        ['user' => 'Arif Satrio', 'item' => 'Sony Alpha a7 III', 'status' => 'Dipinjam', 'color' => 'blue', 'date' => '2 jam lalu'],
-        ['user' => 'Sarah Wijaya', 'item' => 'Tripod Manfrotto', 'status' => 'Dikembalikan', 'color' => 'green', 'date' => '5 jam lalu'],
-        ['user' => 'Budi Santoso', 'item' => 'Lensa Canon Visual 50mm', 'status' => 'Terlambat', 'color' => 'red', 'date' => '1 hari lalu'],
-        ['user' => 'Dian Sastro', 'item' => 'Zoom H6 Recorder', 'status' => 'Menunggu', 'color' => 'yellow', 'date' => 'Baru saja'],
+        $borrowActivities = [
+        ['user' => 'Arif Satrio', 'avatar' => 'heroicon-o-user', 'item' => 'Sony Alpha a7 III', 'status' => 'Dipinjam', 'color' => 'blue', 'date' => '2 jam lalu'],
+        ['user' => 'Sarah Wijaya', 'avatar' => 'heroicon-o-user', 'item' => 'Tripod Manfrotto', 'status' => 'Dikembalikan', 'color' => 'green', 'date' => '5 jam lalu'],
+        ['user' => 'Budi Santoso', 'avatar' => 'heroicon-o-user', 'item' => 'Lensa Canon Visual 50mm', 'status' => 'Terlambat', 'color' => 'red', 'date' => '1 hari lalu'],
+        ['user' => 'Dian Sastro', 'avatar' => 'heroicon-o-user', 'item' => 'Zoom H6 Recorder', 'status' => 'Menunggu', 'color' => 'yellow', 'date' => 'Baru saja'],
         ];
         @endphp
 
-        <x-data-table :columns="$columns" :rows="$activities" emptyMessage="Saat ini belum ada aktivitas peminjaman." />
+        <x-card title="Aktivitas Peminjam" subtitle="Lihat Semua" url="admin.borrow-activities">
+            <x-data-table :columns="$columns" :rows="$borrowActivities" emptyMessage="Saat ini belum ada aktivitas peminjaman.">
+            </x-data-table>
+        </x-card>
     </div>
 
-    <!-- Recent Activity / Items Table -->
-    <div class="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-            <h2 class="text-lg font-bold text-gray-800">Aktivitas Terbaru</h2>
-            <button class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">Lihat Semua</button>
-        </div>
-
+    <!-- Aktivitas Terbaru Table -->
+    <div class="lg:col-span-3">
         @php
         $columns = [
-        ['label' => 'User', 'key' => 'user', 'type' => 'avatar'],
-        ['label' => 'Aksi', 'key' => 'aksi', 'type' => 'badge', 'badge_color_key' => 'color'],
-        ['label' => 'Deskripsi', 'key' => 'description', 'type' => 'text'],
-        ['label' => 'Tanggal', 'key' => 'date', 'type' => 'date-time'],
+        ['label' => 'User', 'key' => 'user', 'component' => 'table-cells.info', 'map' => ['icon' => 'avatar']],
+        [
+        'label' => 'Aksi',
+        'key' => 'action',
+        'component' => 'table-cells.badge',
+        'map' => ['color' => 'color']
+        ],
+        ['label' => 'Deskripsi', 'key' => 'description'],
+        ['label' => 'Tanggal', 'key' => 'date'],
         ];
 
-        $activities = [
-        ['user' => 'Arif Satrio', 'aksi' => 'CREATE', 'color' => 'green', 'description' => 'Add data peminjaman', 'date' => '12-10-2026 07:00'],
-        ['user' => 'Sarah Wijaya', 'aksi' => 'UPDATED', 'color' => 'blue', 'description' => 'Update data peminjaman', 'date' => '20-10-2026 06:00'],
-        ['user' => 'Budi Santoso', 'aksi' => 'CREATE', 'color' => 'green', 'description' => 'Add data peminjaman', 'date' => '21-10-2026 15:00'],
-        ['user' => 'Dian Sastro', 'aksi' => 'APPROVE', 'color' => 'green', 'description' => 'Menyetujui pinjaman dari Budi Santoso', 'date' => '22-10-2026 13:00'],
+        $recentActivities = [
+        ['user' => 'Arif Satrio', 'avatar' => 'heroicon-o-sparkles', 'action' => 'CREATE', 'color' => 'green', 'description' => 'Add data peminjaman', 'date' => '12-10-2026 07:00'],
+        ['user' => 'Sarah Wijaya', 'avatar' => 'heroicon-o-sparkles', 'action' => 'UPDATED', 'color' => 'blue', 'description' => 'Update data peminjaman', 'date' => '20-10-2026 06:00'],
+        ['user' => 'Budi Santoso', 'avatar' => 'heroicon-o-sparkles', 'action' => 'CREATE', 'color' => 'green', 'description' => 'Add data peminjaman', 'date' => '21-10-2026 15:00'],
+        ['user' => 'Dian Sastro', 'avatar' => 'heroicon-o-sparkles', 'action' => 'APPROVE', 'color' => 'green', 'description' => 'Menyetujui pinjaman dari Budi Santoso', 'date' => '22-10-2026 13:00'],
         ];
         @endphp
 
-        <x-data-table :columns="$columns" :rows="$activities" emptyMessage="Saat ini belum ada aktivitas peminjaman." />
+        <x-card title="Aktivitas Terbaru" subtitle="Lihat Semua" url="admin.items">
+            <x-data-table :columns="$columns" :rows="$recentActivities" emptyMessage="Saat ini belum ada aktivitas peminjaman.">
+            </x-data-table>
+        </x-card>
+
     </div>
 </div>
 

@@ -1,5 +1,6 @@
 @props([
 'title',
+'url' => null,
 'subtitle' => null
 ])
 
@@ -11,7 +12,11 @@
         @endisset
 
         @isset($subtitle)
-        <span class="text-xs text-gray-400">{{ $subtitle }}</span>
+            @if (isset($url))
+                <a href="{{ $url }}" class="text-xs text-gray-400">{{ $subtitle }}</a>
+            @else
+                <span class="text-xs text-gray-400">{{ $subtitle }}</span>
+            @endif
         @endisset
     </div>
     @endif
