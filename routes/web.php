@@ -26,11 +26,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Placeholder for item list
         return view('admin.items.index');
     })->name('items.index');
+
+    Route::prefix('/items')->name('items.')->group(function () {
+        Route::get('/create', function () {
+            // Placeholder for create item
+            return view('admin.items.create');
+        })->name('create');
+
+        Route::put('/{id}/edit', function () {
+            return('edit');
+        })->name('edit');
+
+        Route::put('/{id}', function () {
+            return('delete');
+        })->name('delete');
+    });
     
-    Route::get('/items/create', function () {
-        // Placeholder for create item
-        return view('admin.items.create');
-    })->name('items.create');
+
 
     Route::get('/users', function () {
         return view('admin.users.index');
