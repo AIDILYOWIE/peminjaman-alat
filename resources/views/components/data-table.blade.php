@@ -36,14 +36,14 @@
 
         <div class="flex items-center justify-end gap-3 w-full sm:w-auto sm:ml-auto">
             @if($hasExport)
-            <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-transparent shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+            <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-transparent shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 hover:shadow-md active:scale-95">
                 <x-heroicon-o-arrow-down-tray class="sm:h-5 sm:w-5 h-4 w-4" />
                 Export
             </button>
             @endif
 
             @if($hasFilter)
-            <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-200 shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+            <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-200 shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 hover:shadow-md active:scale-95">
                 <x-heroicon-o-funnel class="sm:h-5 sm:w-5 h-4 w-4 text-gray-500" />
                 Filter
             </button>
@@ -51,8 +51,8 @@
 
             @if($addButtonRoute)
             <a href="{{ $addButtonRoute }}"
-                class="fixed bottom-6 right-6 z-40 sm:static flex items-center p-2 justify-center sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 border border-transparent shadow-2xl sm:shadow-sm text-sm font-medium rounded-full sm:rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-300 group">
-                <x-heroicon-o-plus class="h-7 w-7 sm:h-5 sm:w-5" />
+                class="fixed bottom-6 right-6 z-40 sm:static flex items-center p-2 justify-center sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 border border-transparent shadow-2xl sm:shadow-sm text-sm font-medium rounded-full sm:rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-300 hover:shadow-indigo-200 hover:shadow-lg active:scale-95 group">
+                <x-heroicon-o-plus class="h-7 w-7 sm:h-5 sm:w-5 transition-transform group-hover:rotate-90" />
                 <span class="hidden sm:inline">{{ $addButtonText ?? 'Tambah Data' }}</span>
                 <!-- Mobile Tooltip/Label (Optional, but good for UX) -->
                 <span class="absolute right-16 bg-gray-900 text-white text-[10px] px-2 py-1 rounded lg:hidden opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">

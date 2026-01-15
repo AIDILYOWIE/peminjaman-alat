@@ -35,31 +35,62 @@
             <div class="h-full flex flex-col bg-white shadow-xl overflow-y-auto">
                 <!-- Header -->
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10">
-                    <h2 class="text-lg font-bold text-gray-800" x-text="{{ $isEditing }} ? 'Edit ' + '{{ $title }}' : 'Detail ' + '{{ $title }}'"></h2>
-                    <div class="flex items-center gap-2">
+                    <div class="flex-1 relative h-7 overflow-hidden">
+                        <h2 class="text-lg font-bold text-gray-800 absolute inset-0"
+                            x-show="!{{ $isEditing }}"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 opacity-0"
+                            x-transition:enter-end="opacity-100 opacity-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 opacity-100"
+                            x-transition:leave-end="opacity-0 opacity-0">
+                            Detail {{ $title }}
+                        </h2>
+                        <h2 class="text-lg font-bold text-gray-800 absolute inset-0"
+                            x-show="{{ $isEditing }}"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 opacity-0"
+                            x-transition:enter-end="opacity-100 opacity-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 opacity-100"
+                            x-transition:leave-end="opacity-0 opacity-0">
+                            Edit {{ $title }}
+                        </h2>
+                    </div>
+                    <div class="flex items-center sm:gap-2 sm:gap-1">
                         <!-- View Mode Actions -->
-                        <template x-if="!{{ $isEditing }}">
-                            <div class="flex items-center gap-2">
-                                <button @click="{{ $onToggleEdit }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
-                                    <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                </button>
-                                <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
-                                    <x-heroicon-o-trash class="w-5 h-5" />
-                                </button>
-                            </div>
-                        </template>
+                        <div class="flex items-center gap-2"
+                            x-show="!{{ $isEditing }}"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95">
+                            <button @click="{{ $onToggleEdit }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 active:scale-90" title="Edit">
+                                <x-heroicon-o-pencil-square class="w-5 h-5" />
+                            </button>
+                            <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-90" title="Hapus">
+                                <x-heroicon-o-trash class="w-5 h-5" />
+                            </button>
+                        </div>
 
                         <!-- Edit Mode Actions -->
-                        <template x-if="{{ $isEditing }}">
-                            <div class="flex items-center gap-2">
-                                <button @click="{{ $onConfirm }}" class="sm:px-4 sm:py-2 px-2 py-1 sm:text-sm text-xs font-medium text-white bg-indigo-600 sm:rounded-lg rounded-sm hover:bg-indigo-700 transition-colors shadow-sm">
-                                    Konfirmasi
-                                </button>
-                                <button @click="{{ $onCancel }}" class="sm:px-4 sm:py-2 px-2 py-1 sm:text-sm text-xs font-medium text-gray-700 bg-white border border-gray-300 sm:rounded-lg rounded-sm hover:bg-gray-50 transition-colors shadow-sm">
-                                    Batal
-                                </button>
-                            </div>
-                        </template>
+                        <div class="flex items-center gap-2"
+                            x-show="{{ $isEditing }}"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 translate-x-4"
+                            x-transition:enter-end="opacity-100 translate-x-0"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 translate-x-0"
+                            x-transition:leave-end="opacity-0 translate-x-4">
+                            <button @click="{{ $onConfirm }}" class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-white bg-indigo-600 sm:rounded-xl rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm active:scale-95">
+                                Konfirmasi
+                            </button>
+                            <button @click="{{ $onCancel }}" class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-gray-700 bg-white border border-gray-200 sm:rounded-ll rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm active:scale-95">
+                                Batal
+                            </button>
+                        </div>
 
                         <!-- Close Button -->
                         <button @click="{{ $onClose }}" class="ml-4 p-2 text-gray-400 hover:text-gray-500 transition-colors">
