@@ -3,106 +3,213 @@
 @section('header', 'Data Pengguna')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Action Bar -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div class="relative w-full sm:w-96">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+<div class="space-y-6" x-data="{ 
+    detailOpen: false, 
+    isEditing: false, 
+    selectedUser: {},
+    form: {
+        name: '',
+        email: '',
+        role: '',
+        status: '',
+        joined: ''
+    },
+    openDetail(user) {
+        this.selectedUser = user;
+        this.form = { ...user };
+        this.detailOpen = true;
+        this.isEditing = false;
+    },
+    closeDetail() {
+        this.detailOpen = false;
+        this.isEditing = false;
+    },
+    toggleEdit() {
+        this.isEditing = !this.isEditing;
+    },
+    cancelEdit() {
+        this.form = { ...this.selectedUser };
+        this.isEditing = false;
+    },
+    confirmEdit() {
+        this.selectedUser = { ...this.form };
+        this.isEditing = false;
+    }
+}">
+    @php
+    $columns = [
+    [
+    'label' => 'Nama & Email',
+    'key' => 'name',
+    'component' => 'info',
+    'map' => ['subtitle' => 'email', 'icon' => 'avatar'],
+    'class' => 'w-full'
+    ],
+    [
+    'label' => 'Role',
+    'key' => 'role',
+    'component' => 'badge',
+    'map' => ['color' => 'role_color'],
+    'class' => 'w-full sm:min-w-[200px] xl:min-w-[500px] min-w-[150px]'
+    ],
+    [
+    'label' => 'Terdaftar',
+    'key' => 'joined',
+    'hidden' => 'hidden sm:table-cell',
+    'class' => 'whitespace-nowrap w-px'
+    ],
+    ];
+
+    $users = [
+    [
+    'id' => 1,
+    'name' => 'Arif Satrio',
+    'no_induk' => '007754564564564',
+    'email' => 'arif.satrio@example.com',
+    'role' => 'Peminjam',
+    'role_color' => 'purple',
+    'status' => 'Aktif',
+    'status_color' => 'green',
+    'joined' => '12 Jan 2024',
+    'avatar' => 'heroicon-o-user'
+    ],
+    [
+    'id' => 2,
+    'name' => 'Budi Staff',
+    'no_induk' => '007646345364534',
+    'email' => 'budi@example.com',
+    'role' => 'Petugas',
+    'role_color' => 'blue',
+    'status' => 'Aktif',
+    'status_color' => 'green',
+    'joined' => '10 Jan 2024',
+    'avatar' => 'heroicon-o-user'
+    ],
+    ];
+    @endphp
+
+    <x-data-table
+        :columns="$columns"
+        :rows="$users"
+        paginated="true"
+        searchPlaceholder="Cari pengguna berdasarkan nama atau email..."
+        hasFilter="true"
+        hasExport="true"
+        addButtonText="Tambah"
+        onRowClick="openDetail($row)"
+        addButtonText="Tambah Pengguna"
+        :addButtonRoute="route('admin.users.create')" />
+
+
+    <x-slide-over
+        open="detailOpen"
+        title="Pengguna"
+        isEditing="isEditing"
+        onClose="closeDetail()"
+        onToggleEdit="toggleEdit()"
+        onConfirm="confirmEdit()"
+        onCancel="cancelEdit()">
+        <!-- User Hero Section -->
+        <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-8 text-white">
+            <div class="flex items-start justify-between mb-6">
+                <div class="flex-1">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-3">
+                        <x-heroicon-s-user class="w-3 h-3" />
+                        <span x-text="form.no_induk"></span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2" x-text="isEditing ? 'Edit Profil' : form.name"></h3>
+                    <p class="text-indigo-100 text-sm" x-text="form.email"></p>
+                </div>
+                <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/30">
+                    <span class="text-2xl font-bold" x-text="form.name ? form.name.split(' ').map(n => n[0]).join('').toUpperCase() : ''"></span>
+                </div>
             </div>
-            <input type="text" class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow shadow-sm" placeholder="Cari pengguna...">
-        </div>
-        
-        <button class="inline-flex items-center px-4 py-2.5 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            Tambah Pengguna
-        </button>
-    </div>
 
-    <!-- Data Table -->
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama & Email</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Terdaftar</th>
-                        <th scope="col" class="relative px-6 py-4">
-                            <span class="sr-only">Actions</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <!-- User 1 -->
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
-                                    AS
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-semibold text-gray-900">Arif Satrio</div>
-                                    <div class="text-xs text-gray-500">arif.satrio@example.com</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                Peminjam
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Aktif
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            12 Jan 2024
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button class="text-indigo-600 hover:text-indigo-900 mx-2">Ubah</button>
-                        </td>
-                    </tr>
-
-                    <!-- User 2 -->
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
-                                    BD
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-semibold text-gray-900">Budi Staff</div>
-                                    <div class="text-xs text-gray-500">budi@example.com</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Petugas
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Aktif
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            10 Jan 2024
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button class="text-indigo-600 hover:text-indigo-900 mx-2">Ubah</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                    <div class="text-xs text-indigo-100 mb-1">Role Akun</div>
+                    <div class="text-sm font-bold" x-text="form.role"></div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                    <div class="text-xs text-indigo-100 mb-1">Terdaftar Sejak</div>
+                    <div class="text-sm font-bold" x-text="form.joined"></div>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- Form Sections -->
+        <div class="p-6 space-y-6">
+            <!-- Account Info Card -->
+            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                        <x-heroicon-o-identification class="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-900">Informasi Akun</h4>
+                </div>
+
+                <div class="space-y-4">
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">No Induk</label>
+                            <input type="text" x-model="form.no_induk" :disabled="true"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Nama Lengkap</label>
+                            <input type="text" x-model="form.name" :disabled="!isEditing"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Alamat Email</label>
+                            <input type="email" x-model="form.email" :disabled="!isEditing"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Role</label>
+                            <!-- Mode View: Badge -->
+                            <div x-show="!isEditing" class="py-1">
+                                <template x-if="form.role === 'Peminjam'">
+                                    <x-badge color="green" value="Peminjam" />
+                                </template>
+                                <template x-if="form.role === 'Admin'">
+                                    <x-badge color="red" value="Admin" />
+                                </template>
+                                <template x-if="form.role === 'Petugas'">
+                                    <x-badge color="yellow" value="Petugas" />
+                                </template>
+                            </div>
+
+                            <select x-show="isEditing" x-model="form.role" :disabled="!isEditing"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:appearance-none disabled:px-0">
+                                <option>Admin</option>
+                                <option>Petugas</option>
+                                <option>Peminjam</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Card -->
+            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                        <x-heroicon-o-shield-check class="w-5 h-5 text-red-600" />
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-900">Keamanan</h4>
+                </div>
+
+                <button class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                    <x-heroicon-o-key class="w-4 h-4" />
+                    Reset Password
+                </button>
+            </div>
+        </div>
+    </x-slide-over>
 </div>
 @endsection

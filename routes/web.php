@@ -34,19 +34,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
         })->name('create');
 
         Route::put('/{id}/edit', function () {
-            return('edit');
+            return ('edit');
         })->name('edit');
 
         Route::put('/{id}', function () {
-            return('delete');
+            return ('delete');
         })->name('delete');
     });
-    
-
 
     Route::get('/users', function () {
         return view('admin.users.index');
     })->name('users.index');
+
+    Route::prefix('/users')->name('users.')->group(function () {
+        Route::get('/create', function () {
+            // Placeholder for create item
+            return view('admin.users.create');
+        })->name('create');
+
+        Route::put('/{id}/edit', function () {
+            return ('edit');
+        })->name('edit');
+
+        Route::put('/{id}', function () {
+            return ('delete');
+        })->name('delete');
+    });
 });
 
 // User Routes (Borrowing)
