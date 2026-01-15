@@ -47,28 +47,33 @@
     'label' => 'Info Alat',
     'key' => 'name',
     'component' => 'info',
-    'map' => ['subtitle' => 'code', 'icon' => 'icon']
-    ],
-    [
-    'label' => 'Kategori',
-    'key' => 'category',
-    'component' => 'badge',
-    'map' => ['color' => 'category_color'],
-    'align' => 'text-right'
+    'map' => ['subtitle' => 'code', 'icon' => 'icon'],
+    'class' => 'w-full'
     ],
     [
     'label' => 'Stok',
     'key' => 'stock',
     'component' => 'progress',
     'map' => ['total' => 'total_stock'],
-    'hidden' => 'hidden sm:table-cell'
+    'align' => 'text-left',
+    'class' => 'w-full sm:min-w-[200px] xl:min-w-[500px] min-w-[150px]',
+    ],
+    [
+    'label' => 'Kategori',
+    'key' => 'category',
+    'component' => 'badge',
+    'map' => ['color' => 'category_color'],
+    'hidden' => 'hidden sm:table-cell',
+    'align' => 'text-center',
+    'class' => 'whitespace-nowrap w-px'
     ],
     [
     'label' => 'Status',
     'key' => 'status',
     'component' => 'badge',
     'map' => ['color' => 'status_color'],
-    'hidden' => 'hidden sm:table-cell'
+    'hidden' => 'hidden sm:table-cell',
+    'class' => 'whitespace-nowrap w-px'
     ],
     ];
 

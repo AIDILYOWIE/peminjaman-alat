@@ -99,7 +99,7 @@
                         @foreach($columns as $column)
                         @php
                         $visibilityClass = isset($column['hidden']) ? $column['hidden'] . ' ' : '';
-                        $rowClass = $visibilityClass . ($column['rowClass'] ?? '');
+                        $rowClass = $visibilityClass . ($column['class'] ?? $column['rowClass'] ?? '');
 
                         $dataKey = $column['key'] ?? null;
                         $cellValue = $dataKey ? data_get($row, $dataKey) : null;
