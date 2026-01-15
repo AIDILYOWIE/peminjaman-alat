@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('header', 'Data Pengguna')
+@section('header', 'Data Kategori')
 
 @section('content')
 <div class="space-y-6" x-data="{ 
@@ -9,10 +9,7 @@
     selectedUser: {},
     form: {
         name: '',
-        email: '',
-        role: '',
-        status: '',
-        joined: ''
+        member: 0,
     },
     openDetail(user) {
         this.selectedUser = user;
@@ -39,51 +36,27 @@
     @php
     $columns = [
     [
-    'label' => 'Nama & Email',
+    'label' => 'Nama',
     'key' => 'name',
-    'component' => 'info',
-    'map' => ['subtitle' => 'email', 'icon' => 'avatar'],
-    'class' => 'w-full'
+    'class' => 'w-full font-semibold'
     ],
     [
-    'label' => 'Role',
-    'key' => 'role',
-    'component' => 'badge',
-    'map' => ['color' => 'role_color'],
+    'label' => 'Jumlah Alat',
+    'key' => 'member',
     'class' => 'w-full sm:min-w-[200px] xl:min-w-[500px] min-w-[150px]'
-    ],
-    [
-    'label' => 'Terdaftar',
-    'key' => 'joined',
-    'hidden' => 'hidden sm:table-cell',
-    'class' => 'whitespace-nowrap w-px'
     ],
     ];
 
     $users = [
     [
     'id' => 1,
-    'name' => 'Arif Satrio',
-    'no_induk' => '007754564564564',
-    'email' => 'arif.satrio@example.com',
-    'role' => 'Peminjam',
-    'role_color' => 'purple',
-    'status' => 'Aktif',
-    'status_color' => 'green',
-    'joined' => '12 Jan 2024',
-    'avatar' => 'heroicon-o-user'
+    'name' => 'CPU',
+    'member' => 50 
     ],
     [
     'id' => 2,
-    'name' => 'Budi Staff',
-    'no_induk' => '007646345364534',
-    'email' => 'budi@example.com',
-    'role' => 'Petugas',
-    'role_color' => 'blue',
-    'status' => 'Aktif',
-    'status_color' => 'green',
-    'joined' => '10 Jan 2024',
-    'avatar' => 'heroicon-o-user'
+    'name' => 'Mouse',
+    'member' => 20
     ],
     ];
     @endphp
@@ -92,13 +65,12 @@
         :columns="$columns"
         :rows="$users"
         paginated="true"
-        searchPlaceholder="Cari pengguna berdasarkan nama atau email..."
+        searchPlaceholder="Cari pengguna berdasarkan nama..."
         hasFilter="true"
         hasExport="true"
-        addButtonText="Tambah"
         onRowClick="openDetail($row)"
         addButtonText="Tambah"
-        :addButtonRoute="route('admin.users.create')" />
+        :addButtonRoute="route('admin.categories.create')" />
 
 
     <x-slide-over

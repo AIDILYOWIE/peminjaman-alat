@@ -22,12 +22,11 @@ Route::get('/dashboard', function () {
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/items', function () {
-        // Placeholder for item list
-        return view('admin.items.index');
-    })->name('items.index');
-
     Route::prefix('/items')->name('items.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.items.index');
+        })->name('index');
+
         Route::get('/create', function () {
             // Placeholder for create item
             return view('admin.items.create');
@@ -42,14 +41,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
         })->name('delete');
     });
 
-    Route::get('/users', function () {
-        return view('admin.users.index');
-    })->name('users.index');
-
     Route::prefix('/users')->name('users.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.users.index');
+        })->name('index');
+
         Route::get('/create', function () {
             // Placeholder for create item
             return view('admin.users.create');
+        })->name('create');
+
+        Route::put('/{id}/edit', function () {
+            return ('edit');
+        })->name('edit');
+
+        Route::put('/{id}', function () {
+            return ('delete');
+        })->name('delete');
+    });
+
+    Route::prefix('/categories')->name('categories.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.categories.index');
+        })->name('index');
+
+        Route::get('/create', function () {
+            // Placeholder for create item
+            return view('admin.categories.create');
         })->name('create');
 
         Route::put('/{id}/edit', function () {

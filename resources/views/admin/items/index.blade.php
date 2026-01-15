@@ -122,7 +122,7 @@
         :rows="$items"
         paginated="true"
         searchPlaceholder="Cari alat berdasarkan nama atau kode..."
-        addButtonText="Tambah Alat"
+        addButtonText="Tambah"
         :addButtonRoute="route('admin.items.create')"
         hasFilter="true"
         hasExport="true"

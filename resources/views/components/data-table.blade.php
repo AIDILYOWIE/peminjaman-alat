@@ -51,8 +51,8 @@
 
             @if($addButtonRoute)
             <a href="{{ $addButtonRoute }}"
-                class="fixed bottom-6 right-6 z-40 sm:static flex items-center p-2 justify-center sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 border border-transparent shadow-2xl sm:shadow-sm text-sm font-medium rounded-full sm:rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-300 hover:shadow-indigo-200 hover:shadow-lg active:scale-95 group">
-                <x-heroicon-o-plus class="h-7 w-7 sm:h-5 sm:w-5 transition-transform group-hover:rotate-90" />
+                class="fixed bottom-6 right-6 z-40 sm:static flex gap-1 items-center p-2 justify-center sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 border border-transparent shadow-2xl sm:shadow-sm text-sm font-medium rounded-full sm:rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-300 hover:shadow-indigo-200 hover:shadow-lg active:scale-95 group">
+                <x-heroicon-o-plus class="h-7 w-7 sm:h-5 sm:w-5" />
                 <span class="hidden sm:inline">{{ $addButtonText ?? 'Tambah Data' }}</span>
                 <!-- Mobile Tooltip/Label (Optional, but good for UX) -->
                 <span class="absolute right-16 bg-gray-900 text-white text-[10px] px-2 py-1 rounded lg:hidden opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">

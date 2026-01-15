@@ -81,9 +81,17 @@
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Data Alat</span>
             </a>
 
+            <a href="{{ route('admin.categories.index') }}"
+                class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.categories.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.categories.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Data Kategori' : ''">
+                <x-heroicon-o-cube class="w-5 h-5 opacity-75 flex-shrink-0" />
+                <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Data Kategori</span>
+            </a>
+
             <a href="{{ route('admin.users.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
-                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.users.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.pengguna.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.users.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.users.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
                 x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Data Pengguna' : ''">
                 <x-heroicon-o-users class="w-5 h-5 opacity-75 flex-shrink-0" />
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="flex-1">Data Pengguna</span>
