@@ -11,7 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50 text-gray-900 antialiased" x-data="{ sidebarCollapsed: false }">
+<body class="bg-gray-50 text-gray-900 antialiased" x-data="{ sidebarCollapsed: false, sidebarOpen: false }">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         @include('components.navbar')

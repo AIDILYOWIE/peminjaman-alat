@@ -139,8 +139,8 @@
                         <x-heroicon-s-cube class="w-3 h-3" />
                         <span x-text="form.code"></span>
                     </div>
-                    <h3 class="text-2xl font-bold sm:mb-2 mb-1" x-text="isEditing ? 'Edit Alat' : form.name"></h3>
-                    <p class="text-indigo-100 text-sm" x-show="!isEditing" x-text="form.category"></p>
+                    <h3 class="sm:text-2xl text-xl font-bold sm:mb-2" x-text="form.name || 'Nama Alat'"></h3>
+                    <p class="text-indigo-100 sm:text-sm text-xs" x-text="form.category"></p>
                 </div>
                 <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                     <x-heroicon-o-camera class="w-10 h-10 text-white/80" />
@@ -185,7 +185,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 mb-2">Kode Alat</label>
-                            <input type="text" x-model="form.code" :disabled="!isEditing"
+                            <input type="text" x-model="form.code" :disabled="true"
                                 class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
                         </div>
                         <div>

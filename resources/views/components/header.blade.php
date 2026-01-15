@@ -1,6 +1,6 @@
 <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20" x-data="{ notifOpen: false }">
     <div class="flex items-center gap-4">
-        <button class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100">
+        <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
             <x-heroicon-o-bars-3 class="w-6 h-6" />
         </button>
         <h1 class="text-xl font-semibold text-gray-800">
