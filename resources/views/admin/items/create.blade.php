@@ -94,7 +94,7 @@
                     Batal
                 </a>
                 <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors focus:ring-4 focus:ring-indigo-100">
-                    Simpan Alat
+                    Simpan
                 </button>
             </div>
         </form>
