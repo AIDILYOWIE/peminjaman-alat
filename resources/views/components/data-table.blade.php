@@ -11,53 +11,59 @@
 'addButtonText' => null,
 'addButtonRoute' => null,
 'hasFilter' => false,
+'hasExport' => false,
 'onRowClick' => null,
 ])
 
 <div class="space-y-4">
     {{-- Header / Action Bar --}}
     @if($searchPlaceholder || $addButtonRoute || $title || isset($headerActions))
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center sm:gap-4 gap-3">
+    <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center sm:gap-4 gap-3">
         @if($title)
         <h2 class="{{ $titleClass }} font-bold text-gray-800">{{ $title }}</h2>
         @endif
 
-        <div class="flex flex-col-reverse sm:flex-row items-end sm:items-center gap-3 w-full sm:w-auto">
-            @if($searchPlaceholder)
-            <div class="relative w-full sm:w-96">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <x-heroicon-o-magnifying-glass class="sm:h-5 sm:w-5 h-4 w-4 text-gray-400" />
-                </div>
-                <input type="text"
-                    class="block w-full pl-10 pr-3 sm:py-2.5 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-[14px] sm:text-sm transition-shadow shadow-sm"
-                    placeholder="{{ $searchPlaceholder }}">
+        @if($searchPlaceholder)
+        <div class="relative w-full sm:w-96 order-last sm:order-none">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <x-heroicon-o-magnifying-glass class="sm:h-5 sm:w-5 h-4 w-4 text-gray-400" />
             </div>
+            <input type="text"
+                class="block w-full pl-10 pr-3 sm:py-2.5 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-[14px] sm:text-sm transition-shadow shadow-sm"
+                placeholder="{{ $searchPlaceholder }}">
+        </div>
+        @endif
+
+        <div class="flex items-center justify-end gap-3 w-full sm:w-auto sm:ml-auto">
+            @if($hasExport)
+            <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-transparent shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                <x-heroicon-o-arrow-down-tray class="sm:h-5 sm:w-5 h-4 w-4" />
+                Export
+            </button>
             @endif
 
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                @if($hasFilter)
-                <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-200 shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                    <x-heroicon-o-funnel class="sm:h-5 sm:w-5 h-4 w-4 text-gray-500" />
-                    Filter
-                </button>
-                @endif
+            @if($hasFilter)
+            <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-200 shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                <x-heroicon-o-funnel class="sm:h-5 sm:w-5 h-4 w-4 text-gray-500" />
+                Filter
+            </button>
+            @endif
 
-                @if($addButtonRoute)
-                <a href="{{ $addButtonRoute }}"
-                    class="fixed bottom-6 right-6 z-40 sm:static flex items-center p-2 justify-center sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 border border-transparent shadow-2xl sm:shadow-sm text-sm font-medium rounded-full sm:rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-300 group">
-                    <x-heroicon-o-plus class="h-7 w-7 sm:h-5 sm:w-5" />
-                    <span class="hidden sm:inline">{{ $addButtonText ?? 'Tambah Data' }}</span>
-                    <!-- Mobile Tooltip/Label (Optional, but good for UX) -->
-                    <span class="absolute right-16 bg-gray-900 text-white text-[10px] px-2 py-1 rounded lg:hidden opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                        {{ $addButtonText ?? 'Tambah Data' }}
-                    </span>
-                </a>
-                @endif
+            @if($addButtonRoute)
+            <a href="{{ $addButtonRoute }}"
+                class="fixed bottom-6 right-6 z-40 sm:static flex items-center p-2 justify-center sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 border border-transparent shadow-2xl sm:shadow-sm text-sm font-medium rounded-full sm:rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-300 group">
+                <x-heroicon-o-plus class="h-7 w-7 sm:h-5 sm:w-5" />
+                <span class="hidden sm:inline">{{ $addButtonText ?? 'Tambah Data' }}</span>
+                <!-- Mobile Tooltip/Label (Optional, but good for UX) -->
+                <span class="absolute right-16 bg-gray-900 text-white text-[10px] px-2 py-1 rounded lg:hidden opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                    {{ $addButtonText ?? 'Tambah Data' }}
+                </span>
+            </a>
+            @endif
 
-                @if(isset($headerActions))
-                {{ $headerActions }}
-                @endif
-            </div>
+            @if(isset($headerActions))
+            {{ $headerActions }}
+            @endif
         </div>
     </div>
     @endif

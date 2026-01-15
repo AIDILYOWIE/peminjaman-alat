@@ -52,10 +52,10 @@
                         <!-- Edit Mode Actions -->
                         <template x-if="{{ $isEditing }}">
                             <div class="flex items-center gap-2">
-                                <button @click="{{ $onConfirm }}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+                                <button @click="{{ $onConfirm }}" class="sm:px-4 sm:py-2 px-2 py-1 sm:text-sm text-xs font-medium text-white bg-indigo-600 sm:rounded-lg rounded-sm hover:bg-indigo-700 transition-colors shadow-sm">
                                     Konfirmasi
                                 </button>
-                                <button @click="{{ $onCancel }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                                <button @click="{{ $onCancel }}" class="sm:px-4 sm:py-2 px-2 py-1 sm:text-sm text-xs font-medium text-gray-700 bg-white border border-gray-300 sm:rounded-lg rounded-sm hover:bg-gray-50 transition-colors shadow-sm">
                                     Batal
                                 </button>
                             </div>
@@ -63,7 +63,7 @@
 
                         <!-- Close Button -->
                         <button @click="{{ $onClose }}" class="ml-4 p-2 text-gray-400 hover:text-gray-500 transition-colors">
-                            <x-heroicon-o-x-mark class="w-6 h-6" />
+                            <x-heroicon-o-x-mark class="sm:w-6 sm:h-6 w-5 h-5" />
                         </button>
                     </div>
                 </div>

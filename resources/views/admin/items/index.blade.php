@@ -120,6 +120,7 @@
         addButtonText="Tambah Alat"
         :addButtonRoute="route('admin.items.create')"
         hasFilter="true"
+        hasExport="true"
         onRowClick="openDetail($row)" />
 
     <x-slide-over
@@ -131,14 +132,14 @@
         onConfirm="confirmEdit()"
         onCancel="cancelEdit()">
         <!-- Item Hero Section -->
-        <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-8 text-white">
-            <div class="flex items-start justify-between mb-6">
+        <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">
+            <div class="flex items-start justify-between sm:mb-6 mb-4">
                 <div class="flex-1">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-3">
+                    <div class="inline-flex items-center sm:gap-2 gap-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-3">
                         <x-heroicon-s-cube class="w-3 h-3" />
                         <span x-text="form.code"></span>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2" x-text="isEditing ? 'Edit Alat' : form.name"></h3>
+                    <h3 class="text-2xl font-bold sm:mb-2 mb-1" x-text="isEditing ? 'Edit Alat' : form.name"></h3>
                     <p class="text-indigo-100 text-sm" x-show="!isEditing" x-text="form.category"></p>
                 </div>
                 <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -164,7 +165,7 @@
         </div>
 
         <!-- Form Sections -->
-        <div class="p-6 space-y-6">
+        <div class="sm:p-6 p-3 sm:space-y-6 space-y-3">
             <!-- Basic Information Card -->
             <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                 <div class="flex items-center gap-3 mb-4">
