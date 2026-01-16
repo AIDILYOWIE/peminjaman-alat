@@ -102,9 +102,9 @@
         <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
             <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Transaksi</p>
 
-            <a href="{{ route('user.borrow.index') }}"
+            <a href="{{ route('admin.borrowings.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
-                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('user.borrow.index') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('user.borrow.index') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.borrowings.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.borrowings.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
                 x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Peminjaman' : ''">
                 <x-heroicon-o-shopping-cart class="w-5 h-5 opacity-75 flex-shrink-0" />
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Peminjaman</span>

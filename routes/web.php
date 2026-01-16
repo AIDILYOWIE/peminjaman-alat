@@ -78,6 +78,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             return ('delete');
         })->name('delete');
     });
+
+    Route::prefix('/borrowings')->name('borrowings.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.borrowings.index');
+        })->name('index');
+
+        Route::get('/create', function () {
+            return view('admin.borrowings.create');
+        })->name('create');
+    });
+    Route::get('/create', function () {
+        return view('admin.borrowings.create');
+    })->name('create');
 });
 
 // User Routes (Borrowing)

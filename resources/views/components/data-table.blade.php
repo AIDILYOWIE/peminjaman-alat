@@ -119,7 +119,7 @@
 
                         $isRawTag = $componentName && !$isComponent;
                         @endphp
-                        <td class="px-6 py-4 {{ $rowClass }} {{ $column['align'] ?? 'text-left' }}">
+                        <td class="px-6 py-4 min-w-0 {{ $rowClass }} {{ $column['align'] ?? 'text-left' }}">
                             @if($componentName)
                             @php
                             $cellParams = ['value' => $cellValue];
