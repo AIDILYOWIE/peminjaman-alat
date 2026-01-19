@@ -3,7 +3,13 @@
 @section('header', 'Tambah Kategori')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto" x-data="{ 
+    isLoading: true, 
+    isSubmitting: false,
+    init() {
+        setTimeout(() => { this.isLoading = false }, 1500);
+    }
+}">
     <!-- Breadcrumb -->
     <nav class="flex mb-5" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -28,26 +34,57 @@
         </ol>
     </nav>
 
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <form action="#" method="POST" class="p-6 space-y-8">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-h-[300px]">
+        <!-- Skeleton Loading -->
+        <div x-show="isLoading" class="p-6 space-y-8 animate-pulse">
+            <div>
+                <div class="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div class="space-y-4">
+                    <div class="h-4 bg-gray-100 rounded w-1/6"></div>
+                    <div class="h-10 bg-gray-100 rounded w-full"></div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-6 border-t border-gray-100">
+                <div class="h-10 bg-gray-100 rounded w-24"></div>
+                <div class="h-10 bg-gray-100 rounded w-24"></div>
+            </div>
+        </div>
+
+        <!-- Real Form -->
+        <form x-show="!isLoading" x-cloak action="{{ route('admin.categories.store') }}" method="POST" @submit="isSubmitting = true" class="p-6 space-y-8">
+            @csrf
             <!-- Section 1: Basic Information -->
             <div>
                 <h3 class="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">Informasi Dasar</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="col-span-2 md:col-span-2">
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Kategori</label>
-                        <input type="text" name="name" id="name" class="block w-full border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-gray-50 border" placeholder="Contoh: Elektornik">
+                        <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Kategori</label>
+                        <input type="text" name="nama" id="nama" value="{{ old('nama') }}" required
+                            class="block w-full border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-gray-50 border @error('nama') border-red-500 @enderror"
+                            placeholder="Contoh: Elektronik">
+                        @error('nama')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>
 
             <!-- Form Actions -->
             <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-                <a href="{{ route('admin.items.index') }}" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <a href="{{ route('admin.categories.index') }}" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                     Batal
                 </a>
-                <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors focus:ring-4 focus:ring-indigo-100">
-                    Simpan
+                <button type="submit"
+                    :disabled="isSubmitting"
+                    class="relative inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors focus:ring-4 focus:ring-indigo-100 disabled:opacity-70 disabled:cursor-not-allowed">
+                    <span x-show="!isSubmitting">Simpan</span>
+                    <span x-show="isSubmitting" class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Menyimpan...
+                    </span>
                 </button>
             </div>
         </form>

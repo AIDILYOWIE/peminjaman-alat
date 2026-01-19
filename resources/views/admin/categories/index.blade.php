@@ -6,14 +6,23 @@
 <div class="space-y-6" x-data="{ 
     detailOpen: false, 
     isEditing: false, 
-    selectedUser: {},
+    isLoading: true,
+    isSubmitting: false,
+    selectedCategory: {},
     form: {
-        name: '',
-        member: 0,
+        id: null,
+        nama: '',
+        alat_count: 0,
     },
-    openDetail(user) {
-        this.selectedUser = user;
-        this.form = { ...user };
+    init() {
+        // Simulate loading delay for skeleton
+        setTimeout(() => {
+            this.isLoading = false;
+        }, 1500);
+    },
+    openDetail(category) {
+        this.selectedCategory = category;
+        this.form = { ...category };
         this.detailOpen = true;
         this.isEditing = false;
     },
@@ -25,49 +34,49 @@
         this.isEditing = !this.isEditing;
     },
     cancelEdit() {
-        this.form = { ...this.selectedUser };
+        this.form = { ...this.selectedCategory };
         this.isEditing = false;
     },
     confirmEdit() {
-        this.selectedUser = { ...this.form };
-        this.isEditing = false;
+        this.isSubmitting = true;
+        this.$refs.editForm.submit();
+    },
+    confirmDelete() {
+        if (this.form.alat_count > 0) {
+            alert('Kategori tidak dapat dihapus karena masih memiliki alat terkait.');
+            return;
+        }
+
+        if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
+            this.isSubmitting = true;
+            this.$refs.deleteForm.submit();
+        }
     }
 }">
     @php
     $columns = [
     [
-    'label' => 'Nama',
-    'key' => 'name',
+    'label' => 'Nama Kategori',
+    'key' => 'nama',
     'class' => 'w-full font-semibold'
     ],
     [
     'label' => 'Jumlah Alat',
-    'key' => 'member',
-    'class' => 'w-full sm:min-w-[200px] xl:min-w-[500px] min-w-[150px]'
-    ],
-    ];
-
-    $users = [
-    [
-    'id' => 1,
-    'name' => 'CPU',
-    'member' => 50 
-    ],
-    [
-    'id' => 2,
-    'name' => 'Mouse',
-    'member' => 20
+    'key' => 'alat_count',
+    'align' => 'text-center',
+    'class' => 'whitespace-nowrap w-px'
     ],
     ];
     @endphp
 
     <x-data-table
         :columns="$columns"
-        :rows="$users"
+        :rows="$categories"
         paginated="true"
-        searchPlaceholder="Cari pengguna berdasarkan nama..."
+        searchPlaceholder="Cari kategori berdasarkan nama..."
         hasFilter="true"
         hasExport="true"
+        :loading="true"
         onRowClick="openDetail($row)"
         addButtonText="Tambah"
         :addButtonRoute="route('admin.categories.create')" />
@@ -75,112 +84,66 @@
 
     <x-slide-over
         open="detailOpen"
-        title="Pengguna"
+        title="Kategori"
         isEditing="isEditing"
         onClose="closeDetail()"
         onToggleEdit="toggleEdit()"
         onConfirm="confirmEdit()"
-        onCancel="cancelEdit()">
-        <!-- User Hero Section -->
+        onCancel="cancelEdit()"
+        onDelete="confirmDelete()">
+        <!-- Category Hero Section -->
         <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-8 text-white">
             <div class="flex items-start justify-between mb-6">
                 <div class="flex-1">
                     <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-3">
-                        <x-heroicon-s-user class="w-3 h-3" />
-                        <span x-text="form.no_induk"></span>
+                        <x-heroicon-s-tag class="w-3 h-3" />
+                        <span x-text="'ID: ' + (form.id || '#')"></span>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2" x-text="isEditing ? 'Edit Profil' : form.name"></h3>
-                    <p class="text-indigo-100 text-sm" x-text="form.email"></p>
+                    <h3 class="text-2xl font-bold mb-2" x-text="isEditing ? 'Ubah Kategori' : form.nama"></h3>
                 </div>
-                <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/30">
-                    <span class="text-2xl font-bold" x-text="form.name ? form.name.split(' ').map(n => n[0]).join('').toUpperCase() : ''"></span>
+                <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border-4 border-white/30">
+                    <x-heroicon-o-tag class="w-10 h-10 text-white/80" />
                 </div>
             </div>
 
             <!-- Quick Stats -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                    <div class="text-xs text-indigo-100 mb-1">Role Akun</div>
-                    <div class="text-sm font-bold" x-text="form.role"></div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                    <div class="text-xs text-indigo-100 mb-1">Terdaftar Sejak</div>
-                    <div class="text-sm font-bold" x-text="form.joined"></div>
+            <div class="grid grid-cols-1 gap-3">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-center">
+                    <div class="text-xs text-indigo-100 mb-1">Total Alat Terkait</div>
+                    <div class="text-2xl font-bold" x-text="form.alat_count || 0"></div>
                 </div>
             </div>
         </div>
 
         <!-- Form Sections -->
         <div class="p-6 space-y-6">
-            <!-- Account Info Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-identification class="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Informasi Akun</h4>
-                </div>
-
-                <div class="space-y-4">
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">No Induk</label>
-                            <input type="text" x-model="form.no_induk" :disabled="true"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+            <form x-ref="editForm" :action="'/admin/categories/' + form.id" method="POST">
+                @csrf
+                @method('PUT')
+                <!-- Detail Card -->
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                            <x-heroicon-o-identification class="w-5 h-5 text-indigo-600" />
                         </div>
+                        <h4 class="text-sm font-bold text-gray-900">Informasi Kategori</h4>
+                    </div>
+
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Nama Lengkap</label>
-                            <input type="text" x-model="form.name" :disabled="!isEditing"
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Nama Kategori</label>
+                            <input type="text" name="nama" x-model="form.nama" :disabled="!isEditing"
                                 class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Alamat Email</label>
-                            <input type="email" x-model="form.email" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Role</label>
-                            <!-- Mode View: Badge -->
-                            <div x-show="!isEditing" class="py-1">
-                                <template x-if="form.role === 'Peminjam'">
-                                    <x-badge color="green" value="Peminjam" />
-                                </template>
-                                <template x-if="form.role === 'Admin'">
-                                    <x-badge color="red" value="Admin" />
-                                </template>
-                                <template x-if="form.role === 'Petugas'">
-                                    <x-badge color="yellow" value="Petugas" />
-                                </template>
-                            </div>
-
-                            <select x-show="isEditing" x-model="form.role" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:appearance-none disabled:px-0">
-                                <option>Admin</option>
-                                <option>Petugas</option>
-                                <option>Peminjam</option>
-                            </select>
-                        </div>
-                    </div>
                 </div>
-            </div>
+            </form>
 
-            <!-- Security Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-shield-check class="w-5 h-5 text-red-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Keamanan</h4>
-                </div>
-
-                <button class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                    <x-heroicon-o-key class="w-4 h-4" />
-                    Reset Password
-                </button>
-            </div>
+            <!-- Hidden Delete Form -->
+            <form x-ref="deleteForm" :action="'/admin/categories/' + form.id" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
         </div>
     </x-slide-over>
 </div>
