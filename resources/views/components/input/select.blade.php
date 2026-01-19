@@ -18,18 +18,30 @@
     @endif
 
     <div class="relative group">
-        @if($icon)
-        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+        <div
+            @if($attributes->has('::disabled'))
+            x-show="!({!! $attributes->get('::disabled') !!})"
+            @elseif($disabled)
+            class="hidden"
+            @endif
+            @if($icon)
+            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors"
+            @endif
+            >
+            @if($icon)
             <x-dynamic-component :component="$icon" class="h-4 w-4" />
+            @endif
         </div>
-        @endif
 
         <select
             name="{{ $name }}"
             id="{{ $name }}"
             {{ $required ? 'required' : '' }}
             {{ $disabled ? 'disabled' : '' }}
-            {!! $attributes->merge(['class' => 'block w-full  border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-gray-50 border transition-all' . ($icon ? ' pl-10' : '')]) !!}
+            {!! $attributes->merge(['class' => 'block w-full border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-white border transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:appearance-none disabled:text-gray-900' . ($icon ? ' pl-10' : '')]) !!}
+            @if($attributes->has('::disabled'))
+            :class="{ 'pl-10': !({!! $attributes->get('::disabled') !!}), 'pl-0': {!! $attributes->get('::disabled') !!} }"
+            @endif
             >
             @if($placeholder)
             <option value="" disabled {{ is_null($selected) ? 'selected' : '' }}>{{ $placeholder }}</option>

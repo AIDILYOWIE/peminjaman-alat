@@ -13,7 +13,7 @@
 </div>
 
 <aside
-    class="bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out transform flex flex-col h-screen overflow-y-auto overflow-x-hidden lg:translate-x-0 lg:static lg:z-auto"
+    class="bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out transform flex flex-col h-screen overflow-y-auto overflow-x-hidden lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto"
     :class="{
         'translate-x-0': sidebarOpen,
         '-translate-x-full': !sidebarOpen,
@@ -50,8 +50,12 @@
     </div>
 
     {{-- Navigasi Items --}}
+    @php
+    $isStaff = request()->query('role') === 'staff';
+    @endphp
     <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
         {{-- Group Main --}}
+        @if(!$isStaff)
         <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
             <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main</p>
             <a href="{{ route('dashboard') }}"
@@ -69,8 +73,10 @@
                 </template>
             </a>
         </div>
+        @endif
 
         {{-- Group Master Data --}}
+        @if(!$isStaff)
         <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
             <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Master Data</p>
             <a href="{{ route('admin.items.index') }}"
@@ -97,11 +103,13 @@
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="flex-1">Data Pengguna</span>
             </a>
         </div>
+        @endif
 
         {{-- Group Transaksi --}}
         <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
             <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Transaksi</p>
 
+            @if(!$isStaff)
             <a href="{{ route('admin.borrowings.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
                 x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.borrowings.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.borrowings.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
@@ -109,7 +117,14 @@
                 <x-heroicon-o-shopping-cart class="w-5 h-5 opacity-75 flex-shrink-0" />
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Peminjaman</span>
             </a>
-
+            <a href="{{ route('admin.returns.index') }}"
+                class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.returns.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.returns.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Log Pengembalian' : ''">
+                <x-heroicon-o-arrow-path class="w-5 h-5 opacity-75 flex-shrink-0" />
+                <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity> Pengembalian</span>
+            </a>
+            @else
             <a href="{{ route('staff.approvals.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
                 x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('staff.approvals.index') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('staff.approvals.index') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
@@ -118,15 +133,17 @@
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="flex-1">Persetujuan</span>
                 <span x-show="!sidebarCollapsed || sidebarOpen" class="bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-medium">3</span>
             </a>
-
             <a href="{{ route('staff.returns.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
-                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('staff.returns.index') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('staff.returns.index') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
-                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Pengembalian' : ''">
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('staff.returns.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('staff.returns.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Proses Kembali' : ''">
                 <x-heroicon-o-arrow-path class="w-5 h-5 opacity-75 flex-shrink-0" />
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Pengembalian</span>
             </a>
+            @endif
+
         </div>
+    </nav>
     </nav>
 
     <div class="p-4 border-t border-gray-100 shrink-0">

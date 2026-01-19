@@ -2,6 +2,7 @@
 'open' => 'false',
 'title' => 'Detail',
 'isEditing' => 'false',
+'hasActions' => true,
 'onClose' => '',
 'onToggleEdit' => '',
 'onConfirm' => '',
@@ -59,6 +60,7 @@
                     </div>
                     <div class="flex items-center sm:gap-2 sm:gap-1">
                         <!-- View Mode Actions -->
+                        @if($hasActions)
                         <div class="flex items-center gap-2"
                             x-show="!{{ $isEditing }}"
                             x-transition:enter="transition ease-out duration-200"
@@ -74,8 +76,10 @@
                                 <x-heroicon-o-trash class="w-5 h-5" />
                             </button>
                         </div>
+                        @endif
 
                         <!-- Edit Mode Actions -->
+                        @if($hasActions)
                         <div class="flex items-center gap-2"
                             x-show="{{ $isEditing }}"
                             x-transition:enter="transition ease-out duration-200"
@@ -91,9 +95,10 @@
                                 Batal
                             </button>
                         </div>
+                        @endif
 
                         <!-- Close Button -->
-                        <button @click="{{ $onClose }}" class="ml-4 p-2 text-gray-400 hover:text-gray-500 transition-colors">
+                        <button @click="{{ $onClose }}" class="cursor-pointer ml-4 p-2 text-gray-400 hover:text-gray-500 transition-colors">
                             <x-heroicon-o-x-mark class="sm:w-6 sm:h-6 w-5 h-5" />
                         </button>
                     </div>

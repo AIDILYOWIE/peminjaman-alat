@@ -8,10 +8,10 @@
     <div class="flex-shrink-0 h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500">
         <x-dynamic-component :component="$icon" class="w-6 h-6" />
     </div>
-    <div class="ml-4">
-        <div class="text-sm font-semibold text-gray-900">{{ $value }}</div>
+    <div class="ml-4 min-w-0 flex-1 overflow-hidden">
+        <div class="text-sm font-semibold text-gray-900 truncate">{{ $value }}</div>
         @if($subtitle)
-        <div class="text-xs text-gray-500">{{ $subtitle }}</div>
+        <div class="text-xs text-gray-500 truncate">{{ $subtitle }}</div>
         @endif
     </div>
 </div>

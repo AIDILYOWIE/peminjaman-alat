@@ -88,9 +88,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             return view('admin.borrowings.create');
         })->name('create');
     });
-    Route::get('/create', function () {
-        return view('admin.borrowings.create');
-    })->name('create');
+
+    Route::prefix('/returns')->name('returns.')->group(function () {
+        Route::get('/', function () {
+            return view('admin.returns.index');
+        })->name('index');
+    });
+
+
 });
 
 // User Routes (Borrowing)
