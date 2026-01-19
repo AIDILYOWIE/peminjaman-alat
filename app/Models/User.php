@@ -10,6 +10,21 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isStaff()
+    {
+        return $this->role === 'petugas';
+    }
+
+    public function isUser()
+    {
+        return $this->role === 'peminjam';
+    }
+
     protected $fillable = [
         'username',
         'password',

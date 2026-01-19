@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('header', 'Data Peminjaman')
+@section('header', 'Data Pengembalian')
 
 @section('content')
 <div class="space-y-6" x-data="{ 
     detailOpen: false, 
-    isEditing: false, 
+    isEditing: false,
     selectedBorrowing: {},
     form: {
         name: '',
@@ -21,7 +21,9 @@
         fine: 0,
         staff_name: '-',
         email: '',
-        note: ''
+        note: '',
+        return_condition: '',
+        return_note: ''
     },
     openDetail(borrowing) {
         this.selectedBorrowing = borrowing;
@@ -37,14 +39,12 @@
         this.isEditing = !this.isEditing;
     },
     cancelEdit() {
-        this.form = { ...this.selectedItem };
+        this.form = { ...this.selectedBorrowing };
         this.isEditing = false;
     },
     confirmEdit() {
-        // Placeholder for update logic
-        this.selectedItem = { ...this.form };
+        this.selectedBorrowing = { ...this.form };
         this.isEditing = false;
-        // You would typically call an API here
     }
 }">
     @php
@@ -59,7 +59,13 @@
     [
     'label' => 'Alat',
     'key' => 'tools',
-    'class' => 'w-full min-w-[150px] sm:min-w-[200px]'
+    'class' => 'w-full sm:min-w-[200px] xl:min-w-[500px] min-w-[150px]'
+    ],
+    [
+    'label' => 'Tgl Pengembalian',
+    'key' => 'return_date',
+    'hidden' => 'hidden sm:table-cell',
+    'class' => 'w-full sm:min-w-[200px] xl:min-w-[250px] min-w-[150px]'
     ],
     [
     'label' => 'Status',
@@ -81,15 +87,17 @@
     'qty' => 1,
     'avatar' => 'heroicon-o-user',
     'status' => 'pending',
-    'status_label' => 'Menunggu',
-    'status_color' => 'yellow',
+    'status_label' => 'Dipinjam',
+    'status_color' => 'indigo',
     'borrow_date' => '-',
     'return_date' => '17 Jan 2026',
     'fine' => 0,
     'staff_name' => '-',
     'email' => 'arif@gmail.com',
     'note' => 'Untuk kebutuhan praktik studio',
-    'category' => 'Alat Fotografi'
+    'category' => 'Alat Fotografi',
+    'return_condition' => '',
+    'return_note' => ''
     ],
     [
     'id' => 2,
@@ -109,7 +117,9 @@
     'staff_name' => 'Admin Lab',
     'email' => 'budi@gmail.com',
     'note' => 'Keperluan Lab TPM',
-    'category' => 'Elektronik'
+    'category' => 'Elektronik',
+    'return_condition' => '',
+    'return_note' => ''
     ],
     [
     'id' => 3,
@@ -129,7 +139,9 @@
     'staff_name' => 'Admin Lab',
     'email' => 'dewi@gmail.com',
     'note' => 'Terlambat 1 hari',
-    'category' => 'Alat Fotografi'
+    'category' => 'Alat Fotografi',
+    'return_condition' => 'baik',
+    'return_note' => 'Lengkap dan bersih'
     ],
     ];
     @endphp
@@ -141,13 +153,12 @@
         searchPlaceholder="Cari peminjaman..."
         hasFilter="true"
         hasExport="true"
-        onRowClick="openDetail($row)"
-        addButtonText="Tambah"
-        :addButtonRoute="route('admin.borrowings.create')" />
+        onRowClick="openDetail($row)" />
 
     <x-slide-over
         open="detailOpen"
-        title="Peminjaman"
+        title="Pengembalian"
+        isEditing="isEditing"
         onClose="closeDetail()"
         onToggleEdit="toggleEdit()"
         onConfirm="confirmEdit()"
@@ -220,54 +231,23 @@
                 </div>
             </div>
 
-            <!-- Tools List Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-cube class="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Alat yang Dipinjam</h4>
-                </div>
-                <div class="space-y-3">
-                    <template x-for="tool in form.tools" :key="tool.name">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <span class="text-sm font-medium text-gray-700" x-text="tool.name"></span>
-                            <span class="text-xs font-bold bg-white px-2 py-1 rounded-lg border border-gray-200 text-indigo-600" x-text="tool.qty + ' Unit'"></span>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Timeline Section -->
+            <!-- Timeline & Status Section -->
             <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
                         <x-heroicon-o-clock class="w-5 h-5 text-amber-600" />
                     </div>
-                    <h4 class="text-sm font-bold text-gray-900">Waktu & Transaksi</h4>
+                    <h4 class="text-sm font-bold text-gray-900">Waktu & Tenggat</h4>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Batas Kembali</label>
-                            <input type="date" x-model="form.return_date" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
-                        </div>
-
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-white rounded-xl border border-gray-100">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Tgl Pinjam</p>
+                        <p class="text-sm font-bold text-gray-900" x-text="form.borrow_date"></p>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Petugas Approval</label>
-                            <input type="text" x-model="form.staff_name" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Catatan/Keperluan</label>
-                            <input type="text" x-model="form.note" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm leading-relaxed italic text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
-                        </div>
-
+                    <div class="p-3 bg-white rounded-xl border border-gray-100">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Tenggat Kembali</p>
+                        <p class="text-sm font-bold text-red-600" x-text="form.return_date"></p>
                     </div>
                 </div>
             </div>
