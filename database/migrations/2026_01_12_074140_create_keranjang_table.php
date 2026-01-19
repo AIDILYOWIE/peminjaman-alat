@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('keranjang', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('alat_id')->constrained('alat');
-            $table->integer('qty');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('alat_id')->constrained('alat')->cascadeOnUpdate();
+            $table->integer('jumlah');
             $table->timestamps();
         });
     }

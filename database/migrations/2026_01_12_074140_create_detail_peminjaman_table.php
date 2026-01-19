@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('detail_peminjaman', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('peminjaman_id')->constrained('peminjaman');
-            $table->foreignId('alat_id')->constrained('alat');
-            $table->integer('quantity');
+            $table->foreignId('peminjaman_id')->constrained('peminjaman')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('alat_id')->constrained('alat')->cascadeOnUpdate();
+            $table->integer('jumlah');
+            $table->decimal('denda_final', 10, 2)->default(0);
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }

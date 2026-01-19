@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('alat', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->foreignId('kategori_id')->constrained('kategori');
-            $table->string('name');
-            $table->text('description');
+            $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnUpdate();
+            $table->string('nama');
+            $table->text('deskripsi');
             $table->integer('stock')->comment('Berkurang otomatis via Trigger saat status = siap_diambil/dipinjam');
-            $table->string('image');
+            $table->string('gambar');
+            $table->decimal('denda', 10, 2)->default(0);
             $table->timestamps();
         });
     }

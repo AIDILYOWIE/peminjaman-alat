@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('peminjaman', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->comment('Peminjam (Siswa/Guru)');
-            $table->foreignId('staff_id')->nullable()->constrained('users')->comment('Nullable. Diisi saat Petugas melakukan Approval');
-            $table->date('return_date');
-            $table->date('borrow_date')->nullable()->comment('Diisi saat status berubah jadi DIPINJAM');
-            $table->decimal('fine', 10, 2)->default(0)->comment('Dihitung jika tgl_kembali_real > tgl_kembali_rencana');
-            $table->enum('status', ['pending', 'siap_diambil', 'dipinjam', 'selesai', 'ditolak'])->default('pending');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
+            $table->foreignId('petugas_id')->nullable()->constrained('users')->cascadeOnUpdate();
+            $table->date('tgl_pengembalian');
+            $table->date('tgl_pinjam')->nullable()->comment('Diisi saat status berubah jadi DIPINJAM');
+            $table->enum('status', ['pending', 'dipinjam', 'selesai', 'ditolak'])->default('pending');
             $table->timestamps();
         });
     }

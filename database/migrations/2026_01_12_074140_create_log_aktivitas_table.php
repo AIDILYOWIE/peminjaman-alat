@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('log_aktivitas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->enum('action', ['CREATE', 'UPDATE', 'DELETE']);
-            $table->text('description');
-            $table->timestamp('created_at')->useCurrent();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
+            $table->enum('aksi', ['CREATE', 'UPDATE', 'DELETE']);
+            $table->text('deskripsi');
+            $table->timestamp('created_at');
         });
     }
 
