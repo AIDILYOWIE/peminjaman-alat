@@ -23,13 +23,6 @@
 
             <!-- Page Content -->
             <main class="p-4 lg:p-8 flex-1 bg-gray-50">
-                @if(session('success'))
-                <div class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
-                    <x-heroicon-o-check-circle class="w-5 h-5 flex-shrink-0" />
-                    {{ session('success') }}
-                </div>
-                @endif
-
                 @yield('content')
             </main>
 
@@ -38,6 +31,7 @@
         </div>
     </div>
     @stack('scripts')
+    <x-toast />
 </body>
 
 </html>

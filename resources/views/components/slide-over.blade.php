@@ -7,6 +7,7 @@
 'onToggleEdit' => '',
 'onConfirm' => '',
 'onCancel' => '',
+'onDelete' => '',
 ])
 
 <div x-show="{{ $open }}"
@@ -72,7 +73,7 @@
                             <button @click="{{ $onToggleEdit }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 active:scale-90" title="Edit">
                                 <x-heroicon-o-pencil-square class="w-5 h-5" />
                             </button>
-                            <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-90" title="Hapus">
+                            <button @click="{{ $onDelete }}" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-90" title="Hapus">
                                 <x-heroicon-o-trash class="w-5 h-5" />
                             </button>
                         </div>
@@ -88,10 +89,23 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 translate-x-0"
                             x-transition:leave-end="opacity-0 translate-x-4">
-                            <button @click="{{ $onConfirm }}" class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-white bg-indigo-600 sm:rounded-xl rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm active:scale-95">
-                                Konfirmasi
+                            <button @click="{{ $onConfirm }}"
+                                :disabled="typeof isSubmitting !== 'undefined' && isSubmitting"
+                                class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-white bg-indigo-600 sm:rounded-xl rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                                <template x-if="typeof isSubmitting === 'undefined' || !isSubmitting">
+                                    <span>Konfirmasi</span>
+                                </template>
+                                <template x-if="typeof isSubmitting !== 'undefined' && isSubmitting">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span>Memproses...</span>
+                                    </div>
+                                </template>
                             </button>
-                            <button @click="{{ $onCancel }}" class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-gray-700 bg-white border border-gray-200 sm:rounded-ll rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm active:scale-95">
+                            <button @click="{{ $onCancel }}" class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-gray-700 bg-white border border-gray-200 sm:rounded-xl rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm active:scale-95">
                                 Batal
                             </button>
                         </div>

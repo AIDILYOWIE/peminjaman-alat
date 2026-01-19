@@ -1,3 +1,6 @@
+@php
+$user = Auth::user();
+@endphp
 <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20" x-data="{ notifOpen: false }">
     <div class="flex items-center gap-4">
         <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
@@ -104,10 +107,12 @@
         <!-- User Profile -->
         <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
             <div class="text-right hidden md:block">
-                <p class="text-sm font-medium text-gray-700">Courtney Henry</p>
-                <p class="text-xs text-gray-500">Admin Staff</p>
+                <p class="text-sm font-medium text-gray-700">{{ $user->username }}</p>
+                <p class="text-xs text-gray-500">{{ $user->role }}</p>
             </div>
-            <img src="https://ui-avatars.com/api/?name=Courtney+Henry&background=random" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-200">
+            <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                {{ substr($user->username, 0, 1) }} 
+            </div>
         </div>
     </div>
 </header>

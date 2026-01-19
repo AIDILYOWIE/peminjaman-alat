@@ -13,6 +13,7 @@
 'hasFilter' => false,
 'hasExport' => false,
 'onRowClick' => null,
+'loading' => false,
 ])
 
 <div class="space-y-4">
@@ -83,110 +84,106 @@
                             {{ $column['label'] }}
                         </th>
                         @endforeach
-                        @if($hasActions || $routePrefix)
-                        <th class="px-6 py-4 text-right">
-                            <span class="sr-only">Actions</span>
-                            Aksi
-                        </th>
-                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse($rows as $row)
-                    <tr
-                        class="hover:bg-gray-50 transition-colors {{ $onRowClick ? 'cursor-pointer' : '' }}"
-                        @if($onRowClick) @click="{{ str_replace('$row', 'JSON.parse(\''.addslashes(json_encode($row)).'\')', $onRowClick) }}" @endif>
+                    {{-- Skeleton Loading --}}
+                    @for($i = 0; $i < 5; $i++)
+                        <tr x-show="isLoading" class="animate-pulse">
                         @foreach($columns as $column)
                         @php
                         $visibilityClass = isset($column['hidden']) ? $column['hidden'] . ' ' : '';
                         $rowClass = $visibilityClass . ($column['class'] ?? $column['rowClass'] ?? '');
-
-                        $dataKey = $column['key'] ?? null;
-                        $cellValue = $dataKey ? data_get($row, $dataKey) : null;
-
-                        $componentName = $column['component'] ?? null;
-
-                        // Smart component detection:
-                        // 1. If it contains a dot, it's likely a view-based component or manual path
-                        // 2. If it starts with heroicon-, it's an icon component
-                        // 3. If it exists as a standalone view OR in the components folder
-                        $isComponent = $componentName && (
-                        str_contains($componentName, '.') ||
-                        str_starts_with($componentName, 'heroicon-') ||
-                        view()->exists($componentName) ||
-                        view()->exists("components.$componentName")
-                        );
-
-                        $isRawTag = $componentName && !$isComponent;
                         @endphp
-                        <td class="px-6 py-4 min-w-0 {{ $rowClass }} {{ $column['align'] ?? 'text-left' }}">
-                            @if($componentName)
-                            @php
-                            $cellParams = ['value' => $cellValue];
-                            if(isset($column['map'])) {
-                            foreach($column['map'] as $prop => $mapDataKey) {
-                            $cellParams[$prop] = data_get($row, $mapDataKey);
-                            }
-                            }
-                            if(isset($column['params'])) {
-                            $cellParams = array_merge($cellParams, $column['params']);
-                            }
-                            $cellAttributes = new \Illuminate\View\ComponentAttributeBag($cellParams);
-                            @endphp
-
-                            @if($isRawTag)
-                            <{{ $componentName }} {{ $cellAttributes->merge(['class' => $column['textClass'] ?? '']) }}>
-                                {{ $cellValue }}
-                            </{{ $componentName }}>
-                            @else
-                            <x-dynamic-component :component="$componentName" :attributes="$cellAttributes" />
-                            @endif
-                            @else
-                            <span class="{{ $column['textClass'] ?? 'text-gray-500' }}">{{ $cellValue }}</span>
+                        <td class="px-6 py-4 {{ $rowClass }} {{ $column['align'] ?? 'text-left' }}">
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            @if(($column['component'] ?? null) === 'info')
+                            <div class="h-3 bg-gray-100 rounded w-1/2 mt-2"></div>
                             @endif
                         </td>
                         @endforeach
-
                         @if($hasActions || $routePrefix)
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            @if($routePrefix)
+                        <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2">
-                                <a href="{{ route($routePrefix . '.edit', $row['id'] ?? $row) }}"
-                                    class="text-indigo-600 hover:text-indigo-700 p-2 hover:bg-indigo-50 rounded-lg transition-all"
-                                    title="Ubah">
-                                    <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                </a>
-                                <form action="{{ route($routePrefix . '.delete', $row['id'] ?? $row) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        class="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
-                                        title="Hapus">
-                                        <x-heroicon-o-trash class="w-5 h-5" />
-                                    </button>
-                                </form>
+                                <div class="w-8 h-8 bg-gray-100 rounded-lg"></div>
+                                <div class="w-8 h-8 bg-gray-100 rounded-lg"></div>
                             </div>
-                            @endif
-
-                            @if(isset($actions))
-                            {{ $actions }}
-                            @endif
                         </td>
                         @endif
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="{{ count($columns) + ($hasActions || $routePrefix ? 1 : 0) }}" class="px-6 py-12">
-                            <div class="flex flex-col items-center justify-center text-center">
-                                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                                    <x-heroicon-o-inbox class="w-8 h-8 text-gray-300" />
+                        </tr>
+                        @endfor
+
+                        {{-- Real Data --}}
+                        @forelse($rows as $row)
+                        @php
+                        $jsonRow = json_encode($row);
+                        @endphp
+                        <tr
+                            x-show="!isLoading"
+                            x-data="{ rowData: {{ $jsonRow }} }"
+                            class="hover:bg-gray-50 transition-colors {{ $onRowClick ? 'cursor-pointer' : '' }}"
+                            @if($onRowClick) @click="{{ str_replace('$row', 'rowData', $onRowClick) }}" @endif>
+                            @foreach($columns as $column)
+                            @php
+                            $visibilityClass = isset($column['hidden']) ? $column['hidden'] . ' ' : '';
+                            $rowClass = $visibilityClass . ($column['class'] ?? $column['rowClass'] ?? '');
+
+                            $dataKey = $column['key'] ?? null;
+                            $cellValue = $dataKey ? data_get($row, $dataKey) : null;
+
+                            $componentName = $column['component'] ?? null;
+
+                            // Smart component detection
+                            $isComponent = $componentName && (
+                            str_contains($componentName, '.') ||
+                            str_starts_with($componentName, 'heroicon-') ||
+                            view()->exists($componentName) ||
+                            view()->exists("components.$componentName")
+                            );
+
+                            $isRawTag = $componentName && !$isComponent;
+                            @endphp
+                            <td class="px-6 py-4 min-w-0 {{ $rowClass }} {{ $column['align'] ?? 'text-left' }}">
+                                @if($componentName)
+                                @php
+                                $cellParams = ['value' => $cellValue];
+                                if(isset($column['map'])) {
+                                foreach($column['map'] as $prop => $mapDataKey) {
+                                $cellParams[$prop] = data_get($row, $mapDataKey);
+                                }
+                                }
+                                if(isset($column['params'])) {
+                                $cellParams = array_merge($cellParams, $column['params']);
+                                }
+                                $cellAttributes = new \Illuminate\View\ComponentAttributeBag($cellParams);
+                                @endphp
+
+                                @if($isRawTag)
+                                <{{ $componentName }} {{ $cellAttributes->merge(['class' => $column['textClass'] ?? '']) }}>
+                                    {{ $cellValue }}
+                                </{{ $componentName }}>
+                                @else
+                                <x-dynamic-component :component="$componentName" :attributes="$cellAttributes" />
+                                @endif
+                                @else
+                                <span class="{{ $column['textClass'] ?? 'text-gray-500' }}">{{ $cellValue }}</span>
+                                @endif
+                            </td>
+                            @endforeach
+                        </tr>
+                        @empty
+                        <tr x-show="!isLoading">
+                            <td colspan="{{ count($columns) + ($hasActions || $routePrefix ? 1 : 0) }}" class="px-6 py-12">
+                                <div class="flex flex-col items-center justify-center text-center">
+                                    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                        <x-heroicon-o-inbox class="w-8 h-8 text-gray-300" />
+                                    </div>
+                                    <h3 class="text-sm font-medium text-gray-900">{{ $emptyMessage }}</h3>
+                                    <p class="text-xs text-gray-500 mt-1">Data yang anda cari mungkin belum tersedia saat ini.</p>
                                 </div>
-                                <h3 class="text-sm font-medium text-gray-900">{{ $emptyMessage }}</h3>
-                                <p class="text-xs text-gray-500 mt-1">Data yang anda cari mungkin belum tersedia saat ini.</p>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
+                            </td>
+                        </tr>
+                        @endforelse
                 </tbody>
             </table>
         </div>
