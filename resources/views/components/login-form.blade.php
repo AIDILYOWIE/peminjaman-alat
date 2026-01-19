@@ -1,6 +1,7 @@
 <div>
-    <form action="{{ route('login') }}" method="POST" class="space-y-6">
+    <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
         @csrf
+        <!-- Role model is from parent div in login.blade.php -->
         <input type="hidden" name="role" x-model="role">
 
         <!-- Dynamic Field (NISN or NIP) -->
@@ -18,9 +19,13 @@
                     :name="role === 'siswa' ? 'nisn' : 'nip'"
                     :id="role === 'siswa' ? 'nisn' : 'nip'"
                     :placeholder="role === 'siswa' ? 'Masukkan NISN' : 'Masukkan NIP'"
+                    :value="role === 'siswa' ? '{{ old('nisn') }}' : '{{ old('nip') }}'"
                     required
-                    class="block w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white">
+                    class="block w-full pl-12 pr-4 py-3.5 border @error('no_induk') border-red-500 @else border-gray-200 @enderror rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white text-sm">
             </div>
+            @error('no_induk')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Password Field -->
@@ -29,7 +34,7 @@
                 Password
             </label>
             <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex                                                                                                                     items-center pointer-events-none">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <x-heroicon-o-lock-closed class="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -38,7 +43,7 @@
                     id="password"
                     placeholder="Masukkan Password"
                     required
-                    class="block w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white">
+                    class="block w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-gray-50 hover:bg-white text-sm">
             </div>
         </div>
 
@@ -62,7 +67,7 @@
         <!-- Submit Button -->
         <button
             type="submit"
-            class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-200 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+            class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-100 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
             <x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5" />
             Masuk
         </button>

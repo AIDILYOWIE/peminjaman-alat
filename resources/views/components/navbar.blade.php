@@ -51,11 +51,14 @@
 
     {{-- Navigasi Items --}}
     @php
-    $isStaff = request()->query('role') === 'staff';
+    $user = Auth::user();
+    $isAdmin = $user->role === 'admin';
+    $isPetugas = $user->role === 'petugas';
+    $isPeminjam = $user->role === 'peminjam';
     @endphp
     <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
         {{-- Group Main --}}
-        @if(!$isStaff)
+        @if($isAdmin || $isPeminjam)
         <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
             <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main</p>
             <a href="{{ route('dashboard') }}"
@@ -76,7 +79,7 @@
         @endif
 
         {{-- Group Master Data --}}
-        @if(!$isStaff)
+        @if($isAdmin)
         <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
             <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Master Data</p>
             <a href="{{ route('admin.items.index') }}"
@@ -109,7 +112,7 @@
         <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
             <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Transaksi</p>
 
-            @if(!$isStaff)
+            @if($isAdmin)
             <a href="{{ route('admin.borrowings.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
                 x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.borrowings.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.borrowings.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
@@ -124,7 +127,9 @@
                 <x-heroicon-o-arrow-path class="w-5 h-5 opacity-75 flex-shrink-0" />
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity> Pengembalian</span>
             </a>
-            @else
+            @endif
+
+            @if($isPetugas)
             <a href="{{ route('staff.approvals.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
                 x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('staff.approvals.index') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('staff.approvals.index') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
@@ -142,15 +147,25 @@
             </a>
             @endif
 
+            @if($isPeminjam)
+            <a href="{{ route('user.borrow.index') }}"
+                class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('user.borrow.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('user.borrow.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Pinjam Alat' : ''">
+                <x-heroicon-o-shopping-cart class="w-5 h-5 opacity-75 flex-shrink-0" />
+                <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Pinjam Alat</span>
+            </a>
+            @endif
+
         </div>
     </nav>
     </nav>
 
-    <div class="p-4 border-t border-gray-100 shrink-0">
-        <form method="POST">
+    <div class="px-4 py-3 border-t border-gray-100 shrink-0">
+        <form action="{{ route('logout') }}" method="POST">
             @csrf
             <button type="submit"
-                class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50 transition-colors group relative"
+                class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50 transition-colors group relative cursor-pointer"
                 x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center' : 'gap-3'"
                 x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Logout' : ''">
                 <x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5 opacity-75 flex-shrink-0" />
