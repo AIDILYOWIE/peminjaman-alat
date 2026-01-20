@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ItemController;
+use App\Http\Controllers\Admin\UserController;
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -30,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         // Items Management
         Route::prefix('/items')->name('items.')->group(function () {
+            Route::get('/export', [ItemController::class, 'export'])->name('export');
             Route::get('/', [ItemController::class, 'index'])->name('index');
             Route::get('/create', [ItemController::class, 'create'])->name('create');
             Route::post('/', [ItemController::class, 'store'])->name('store');
@@ -38,23 +40,18 @@ Route::middleware('auth')->group(function () {
         });
 
         // Users Management
-        Route::prefix('/users')->name('users.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.users.index');
-            })->name('index');
-            Route::get('/create', function () {
-                return view('admin.users.create');
-            })->name('create');
-            Route::put('/{id}/edit', function () {
-                return ('edit');
-            })->name('edit');
-            Route::delete('/{id}', function () {
-                return ('delete');
-            })->name('delete');
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/export', [UserController::class, 'export'])->name('export');
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::get('/create', [UserController::class, 'create'])->name('create');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('delete');
         });
 
         // Categories Management
         Route::prefix('/categories')->name('categories.')->group(function () {
+            Route::get('/export', [CategoryController::class, 'export'])->name('export');
             Route::get('/', [CategoryController::class, 'index'])->name('index');
             Route::get('/create', [CategoryController::class, 'create'])->name('create');
             Route::post('/', [CategoryController::class, 'store'])->name('store');

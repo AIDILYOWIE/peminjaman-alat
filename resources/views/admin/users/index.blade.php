@@ -6,17 +6,27 @@
 <div class="space-y-6" x-data="{ 
     detailOpen: false, 
     isEditing: false, 
+    isLoading: true,
+    isSubmitting: false,
     selectedUser: {},
     form: {
-        name: '',
-        email: '',
+        id: null,
+        username: '',
+        no_induk: '',
         role: '',
-        status: '',
-        joined: ''
+        password: ''
+    },
+    init() {
+        setTimeout(() => {
+            this.isLoading = false;
+        }, 1500);
     },
     openDetail(user) {
         this.selectedUser = user;
-        this.form = { ...user };
+        this.form = { 
+            ...user, 
+            password: '' 
+        };
         this.detailOpen = true;
         this.isEditing = false;
     },
@@ -28,62 +38,52 @@
         this.isEditing = !this.isEditing;
     },
     cancelEdit() {
-        this.form = { ...this.selectedUser };
+        this.form = { ...this.selectedUser, password: '' };
         this.isEditing = false;
     },
     confirmEdit() {
-        this.selectedUser = { ...this.form };
-        this.isEditing = false;
+        this.isSubmitting = true;
+        this.$refs.editForm.submit();
+    },
+    confirmDelete() {
+        this.$dispatch('open-confirm', {
+            title: 'Hapus Pengguna',
+            message: 'Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.',
+            confirmText: 'Ya, Hapus',
+            onConfirm: () => {
+                this.isSubmitting = true;
+                this.$refs.deleteForm.submit();
+            }
+        });
+    },
+    getRoleLabel(role) {
+        const labels = {
+            'admin': 'Admin',
+            'petugas': 'Petugas',
+            'peminjam': 'Peminjam'
+        };
+        return labels[role] || role;
     }
 }">
     @php
     $columns = [
     [
-    'label' => 'Nama & Email',
-    'key' => 'name',
-    'component' => 'info',
-    'map' => ['subtitle' => 'email', 'icon' => 'avatar'],
-    'class' => 'w-full'
+    'label' => 'Username',
+    'key' => 'username',
+    'align' => 'text-left',
+    ],
+    [
+    'label' => 'No. Induk / Identitas',
+    'key' => 'no_induk',
+    'align' => 'text-left',
     ],
     [
     'label' => 'Role',
     'key' => 'role',
     'component' => 'badge',
-    'map' => ['color' => 'role_color'],
-    'class' => 'w-full sm:min-w-[200px] xl:min-w-[500px] min-w-[150px]'
-    ],
-    [
-    'label' => 'Terdaftar',
-    'key' => 'joined',
-    'hidden' => 'hidden sm:table-cell',
-    'class' => 'whitespace-nowrap w-px'
-    ],
-    ];
-
-    $users = [
-    [
-    'id' => 1,
-    'name' => 'Arif Satrio',
-    'no_induk' => '007754564564564',
-    'email' => 'arif.satrio@example.com',
-    'role' => 'Peminjam',
-    'role_color' => 'purple',
-    'status' => 'Aktif',
-    'status_color' => 'green',
-    'joined' => '12 Jan 2024',
-    'avatar' => 'heroicon-o-user'
-    ],
-    [
-    'id' => 2,
-    'name' => 'Budi Staff',
-    'no_induk' => '007646345364534',
-    'email' => 'budi@example.com',
-    'role' => 'Petugas',
-    'role_color' => 'blue',
-    'status' => 'Aktif',
-    'status_color' => 'green',
-    'joined' => '10 Jan 2024',
-    'avatar' => 'heroicon-o-user'
+    'params' => ['color' => 'random'],
+    'align' => 'text-center',
+    'class' => 'w-px whitespace-nowrap'
     ],
     ];
     @endphp
@@ -92,14 +92,13 @@
         :columns="$columns"
         :rows="$users"
         paginated="true"
-        searchPlaceholder="Cari pengguna berdasarkan nama atau email..."
+        searchPlaceholder="Cari pengguna..."
+        addButtonText="Tambah"
+        :addButtonRoute="route('admin.users.create')"
         hasFilter="true"
         hasExport="true"
-        addButtonText="Tambah"
-        onRowClick="openDetail($row)"
-        addButtonText="Tambah"
-        :addButtonRoute="route('admin.users.create')" />
-
+        :loading="true"
+        onRowClick="openDetail($row)" />
 
     <x-slide-over
         open="detailOpen"
@@ -108,107 +107,77 @@
         onClose="closeDetail()"
         onToggleEdit="toggleEdit()"
         onConfirm="confirmEdit()"
-        onCancel="cancelEdit()">
-        <!-- User Hero Section -->
-        <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-8 text-white">
-            <div class="flex items-start justify-between mb-6">
-                <div class="flex-1">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-3">
-                        <x-heroicon-s-user class="w-3 h-3" />
-                        <span x-text="form.no_induk"></span>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2" x-text="isEditing ? 'Edit Profil' : form.name"></h3>
-                    <p class="text-indigo-100 text-sm" x-text="form.email"></p>
-                </div>
-                <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/30">
-                    <span class="text-2xl font-bold" x-text="form.name ? form.name.split(' ').map(n => n[0]).join('').toUpperCase() : ''"></span>
-                </div>
-            </div>
+        onCancel="cancelEdit()"
+        onDelete="confirmDelete()">
 
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                    <div class="text-xs text-indigo-100 mb-1">Role Akun</div>
-                    <div class="text-sm font-bold" x-text="form.role"></div>
+        <!-- User Profile Hero -->
+        <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">
+            <div class="flex items-center justify-between gap-4">
+
+                <div>
+                    <h3 class="text-xl font-bold" x-text="form.username"></h3>
+                    <p class="text-indigo-100 text-sm" x-text="getRoleLabel(form.role)"></p>
                 </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                    <div class="text-xs text-indigo-100 mb-1">Terdaftar Sejak</div>
-                    <div class="text-sm font-bold" x-text="form.joined"></div>
+                <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-white/30">
+                    <x-heroicon-o-user class="w-8 h-8 text-white" />
                 </div>
             </div>
         </div>
 
-        <!-- Form Sections -->
-        <div class="p-6 space-y-6">
-            <!-- Account Info Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-identification class="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Informasi Akun</h4>
-                </div>
+        <!-- Form Details -->
+        <div class="sm:p-6 p-4">
+            <form x-ref="editForm" :action="'{{ route('admin.users.index') }}/' + form.id" method="POST">
+                @csrf
+                @method('PUT')
 
-                <div class="space-y-4">
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                            <x-heroicon-o-identification class="w-5 h-5 text-indigo-600" />
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-900">Informasi Akun</h4>
+                    </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">No Induk</label>
-                            <input type="text" x-model="form.no_induk" :disabled="true"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Username</label>
+                            <input type="text" name="username" x-model="form.username" :disabled="!isEditing"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                            @error('username') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Nama Lengkap</label>
-                            <input type="text" x-model="form.name" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">No. Induk (NIS/NIP)</label>
+                            <input type="text" name="no_induk" x-model="form.no_induk" :disabled="!isEditing"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                            @error('no_induk') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Alamat Email</label>
-                            <input type="email" x-model="form.email" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
-                        </div>
-                        <div>
+                        <div class="col-span-2">
                             <label class="block text-xs font-semibold text-gray-500 mb-2">Role</label>
-                            <!-- Mode View: Badge -->
-                            <div x-show="!isEditing" class="py-1">
-                                <template x-if="form.role === 'Peminjam'">
-                                    <x-badge color="green" value="Peminjam" />
-                                </template>
-                                <template x-if="form.role === 'Admin'">
-                                    <x-badge color="red" value="Admin" />
-                                </template>
-                                <template x-if="form.role === 'Petugas'">
-                                    <x-badge color="yellow" value="Petugas" />
-                                </template>
-                            </div>
-
-                            <select x-show="isEditing" x-model="form.role" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:appearance-none disabled:px-0">
-                                <option>Admin</option>
-                                <option>Petugas</option>
-                                <option>Peminjam</option>
+                            <select name="role" x-model="form.role" :disabled="!isEditing"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:appearance-none">
+                                <option value="admin">Admin</option>
+                                <option value="petugas">Petugas</option>
+                                <option value="peminjam">Peminjam</option>
                             </select>
+                            @error('role') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
+                        </div>
+                        <div x-show="isEditing" class="col-span-2">
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Ganti Password (Kosongkan jika tidak diubah)</label>
+                            <input type="password" name="password" x-model="form.password"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all">
+                            @error('password') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Security Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-shield-check class="w-5 h-5 text-red-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Keamanan</h4>
-                </div>
 
-                <button class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                    <x-heroicon-o-key class="w-4 h-4" />
-                    Reset Password
-                </button>
-            </div>
+
+                </div>
+            </form>
+
+            <form x-ref="deleteForm" :action="'{{ route('admin.users.index') }}/' + form.id" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
         </div>
     </x-slide-over>
 </div>
