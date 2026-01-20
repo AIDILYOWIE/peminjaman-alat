@@ -85,7 +85,8 @@
         :loading="true"
         onRowClick="openDetail($row)"
         addButtonText="Tambah"
-        :addButtonRoute="route('admin.categories.create')" />
+        :addButtonRoute="route('admin.categories.create')"
+        :exportRoute="route('admin.categories.export')" />
 
 
     <x-slide-over

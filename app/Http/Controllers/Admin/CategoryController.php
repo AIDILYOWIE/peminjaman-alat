@@ -7,6 +7,7 @@ use App\Models\Kategori;
 use App\Http\Requests\Admin\CategoryRequest;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CategoryController extends Controller
 {
@@ -17,10 +18,16 @@ class CategoryController extends Controller
         $this->categoryService = $categoryService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $categories = $this->categoryService->getAllCategories();
+        $categories = $this->categoryService->getAllCategories(5, $request->search);
         return view('admin.categories.index', compact('categories'));
+    }
+
+    public function export(Request $request)
+    {
+        $categories = $this->categoryService->exportCategories($request->search);
+        return Excel::download(new \App\Exports\CategoriesExport($categories), 'data-kategori-' . now()->format('Y-m-d') . '.xlsx');
     }
 
     public function create()

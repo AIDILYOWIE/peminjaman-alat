@@ -17,6 +17,28 @@ class CategoryRepository
         return Kategori::withCount('alat')->get();
     }
 
+    public function getAllPaginated(int $perPage = 10, ?string $search = null)
+    {
+        $query = Kategori::withCount('alat')->latest();
+
+        if ($search) {
+            $query->where('nama', 'like', "%{$search}%");
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public function getAllFiltered(?string $search = null): \Illuminate\Support\Collection
+    {
+        $query = Kategori::withCount('alat')->latest();
+
+        if ($search) {
+            $query->where('nama', 'like', "%{$search}%");
+        }
+
+        return $query->get();
+    }
+
     /**
      * Find a category by ID.
      *

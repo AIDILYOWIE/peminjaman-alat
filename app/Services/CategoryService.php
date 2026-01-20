@@ -18,15 +18,19 @@ class CategoryService
     }
 
     /**
-     * Get all categories, using cache if available.
+     * Get all categories, paginated.
      *
-     * @return Collection
+     * @param int $perPage
+     * @return mixed
      */
-    public function getAllCategories(): Collection
+    public function getAllCategories(int $perPage = 5, ?string $search = null)
     {
-        return Cache::remember($this->cacheKey, now()->addHours(24), function () {
-            return $this->categoryRepository->getAllWithCounts();
-        });
+        return $this->categoryRepository->getAllPaginated($perPage, $search);
+    }
+
+    public function exportCategories(?string $search = null): \Illuminate\Support\Collection
+    {
+        return $this->categoryRepository->getAllFiltered($search);
     }
 
     /**
