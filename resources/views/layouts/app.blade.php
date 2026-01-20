@@ -32,6 +32,7 @@
     </div>
     @stack('scripts')
     <x-toast />
+    <x-confirm-modal />
 </body>
 
 </html>

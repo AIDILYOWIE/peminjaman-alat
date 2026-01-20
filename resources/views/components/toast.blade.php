@@ -15,6 +15,8 @@
             showToast('{{ session('success') }}', 'success');
         @elseif(session('error'))
             showToast('{{ session('error') }}', 'error');
+        @elseif($errors->any())
+            showToast('Ada kesalahan pada input data Anda.', 'error');
         @endif
     "
     x-show="show"

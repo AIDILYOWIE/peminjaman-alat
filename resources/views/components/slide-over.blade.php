@@ -70,10 +70,10 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95">
-                            <button @click="{{ $onToggleEdit }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 active:scale-90" title="Edit">
+                            <button @click="{{ $onToggleEdit }}" class="cursor-pointer p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 active:scale-90" title="Edit">
                                 <x-heroicon-o-pencil-square class="w-5 h-5" />
                             </button>
-                            <button @click="{{ $onDelete }}" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-90" title="Hapus">
+                            <button @click="{{ $onDelete }}" class="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-90" title="Hapus">
                                 <x-heroicon-o-trash class="w-5 h-5" />
                             </button>
                         </div>
@@ -91,7 +91,7 @@
                             x-transition:leave-end="opacity-0 translate-x-4">
                             <button @click="{{ $onConfirm }}"
                                 :disabled="typeof isSubmitting !== 'undefined' && isSubmitting"
-                                class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-white bg-indigo-600 sm:rounded-xl rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                                class="cursor-pointer sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-white bg-indigo-600 sm:rounded-xl rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2">
                                 <template x-if="typeof isSubmitting === 'undefined' || !isSubmitting">
                                     <span>Konfirmasi</span>
                                 </template>
@@ -105,7 +105,7 @@
                                     </div>
                                 </template>
                             </button>
-                            <button @click="{{ $onCancel }}" class="sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-gray-700 bg-white border border-gray-200 sm:rounded-xl rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm active:scale-95">
+                            <button @click="{{ $onCancel }}" class="cursor-pointer sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-gray-700 bg-white border border-gray-200 sm:rounded-xl rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm active:scale-95">
                                 Batal
                             </button>
                         </div>
