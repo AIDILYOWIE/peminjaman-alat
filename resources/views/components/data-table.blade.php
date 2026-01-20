@@ -14,12 +14,36 @@
 'hasExport' => false,
 'onRowClick' => null,
 'loading' => false,
+'exportRoute' => null,
 ])
 
 <div class="space-y-4">
     {{-- Header / Action Bar --}}
     @if($searchPlaceholder || $addButtonRoute || $title || isset($headerActions))
-    <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center sm:gap-4 gap-3">
+    <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center sm:gap-4 gap-3"
+        x-data="{ 
+            search: '{{ request('search') }}',
+            doSearch() {
+                let url = new URL(window.location.href);
+                if (this.search) {
+                    url.searchParams.set('search', this.search);
+                } else {
+                    url.searchParams.delete('search');
+                }
+                url.searchParams.delete('page'); // Reset to page 1 on search
+                window.location.href = url.toString();
+            },
+            doExport() {
+                let exportUrl = '{{ $exportRoute }}';
+                if (!exportUrl) return;
+                
+                let url = new URL(exportUrl, window.location.origin);
+                if (this.search) {
+                    url.searchParams.set('search', this.search);
+                }
+                window.location.href = url.toString();
+            }
+        }">
         @if($title)
         <h2 class="{{ $titleClass }} font-bold text-gray-800">{{ $title }}</h2>
         @endif
@@ -30,14 +54,22 @@
                 <x-heroicon-o-magnifying-glass class="sm:h-5 sm:w-5 h-4 w-4 text-gray-400" />
             </div>
             <input type="text"
+                x-model="search"
+                @keydown.enter="doSearch()"
                 class="block w-full pl-10 pr-3 sm:py-2.5 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-[14px] sm:text-sm transition-shadow shadow-sm"
                 placeholder="{{ $searchPlaceholder }}">
+
+            <template x-if="search">
+                <button @click="search = ''; doSearch()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <x-heroicon-o-x-mark class="h-4 w-4" />
+                </button>
+            </template>
         </div>
         @endif
 
         <div class="flex items-center justify-end gap-3 w-full sm:w-auto sm:ml-auto">
             @if($hasExport)
-            <button class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-transparent shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 hover:shadow-md active:scale-95">
+            <button @click="doExport()" class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-transparent shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 hover:shadow-md active:scale-95">
                 <x-heroicon-o-arrow-down-tray class="sm:h-5 sm:w-5 h-4 w-4" />
                 Export
             </button>
@@ -188,9 +220,14 @@
             </table>
         </div>
 
-        @if($paginated && is_object($rows) && method_exists($rows, 'links'))
-        <div class="bg-white px-4 py-3 border-t border-gray-100 sm:px-6">
-            {{ $rows->links() }}
+        {{-- Pagination Footer --}}
+        @if($paginated && is_object($rows) && method_exists($rows, 'links') && $rows->hasPages())
+        <div class="px-6 py-4">
+            <div class="flex justify-end">
+                <div class="flex-shrink-0">
+                    {{ $rows->links() }}
+                </div>
+            </div>
         </div>
         @endif
     </div>
