@@ -26,12 +26,14 @@ class ItemService
      * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getAllItems(int $perPage = 10): LengthAwarePaginator
+    public function getAllItems(int $perPage = 5, ?string $search = null): LengthAwarePaginator
     {
-        // We use a different cache key for paginated data or just don't cache pagination for now
-        // to simplify. For industry standard, usually we cache the whole collection if it's small,
-        // or use Tags for complex pagination.
-        return $this->itemRepository->getAllPaginated($perPage);
+        return $this->itemRepository->getAllPaginated($perPage, $search);
+    }
+
+    public function exportItems(?string $search = null): \Illuminate\Support\Collection
+    {
+        return $this->itemRepository->getAllFiltered($search);
     }
 
     /**

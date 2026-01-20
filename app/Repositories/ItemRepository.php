@@ -14,9 +14,32 @@ class ItemRepository
      * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getAllPaginated(int $perPage = 10): LengthAwarePaginator
+    public function getAllPaginated(int $perPage = 10, ?string $search = null): LengthAwarePaginator
     {
-        return Alat::with('kategori')->latest()->paginate($perPage);
+        $query = Alat::with('kategori')->latest();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public function getAllFiltered(?string $search = null): \Illuminate\Support\Collection
+    {
+        $query = Alat::with('kategori')->latest();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->get();
     }
 
     /**

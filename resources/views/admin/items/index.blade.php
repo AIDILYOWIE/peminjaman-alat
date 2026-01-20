@@ -149,7 +149,8 @@
         hasFilter="true"
         hasExport="true"
         :loading="true"
-        onRowClick="openDetail($row)" />
+        onRowClick="openDetail($row)"
+        :exportRoute="route('admin.items.export')" />
 
     <x-slide-over
         open="detailOpen"

@@ -10,6 +10,7 @@ use App\Models\Kategori;
 use App\Http\Requests\Admin\ItemRequest;
 use App\Services\ItemService;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemController extends Controller
 {
@@ -20,10 +21,16 @@ class ItemController extends Controller
         $this->itemService = $itemService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $items = $this->itemService->getAllItems();
+        $items = $this->itemService->getAllItems(5, $request->search);
         return view('admin.items.index', compact('items'));
+    }
+
+    public function export(Request $request)
+    {
+        $items = $this->itemService->exportItems($request->search);
+        return Excel::download(new \App\Exports\AlatExport($items), 'data-alat-' . now()->format('Y-m-d') . '.xlsx');
     }
 
     public function create()
