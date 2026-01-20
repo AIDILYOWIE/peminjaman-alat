@@ -43,14 +43,20 @@
     },
     confirmDelete() {
         if (this.form.alat_count > 0) {
-            alert('Kategori tidak dapat dihapus karena masih memiliki alat terkait.');
+            // Using a custom message or alert but UI consistent is better here
+            alert('Kategori tidak dapat dihapus karena masih memiliki alat terkait.'); 
             return;
         }
 
-        if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-            this.isSubmitting = true;
-            this.$refs.deleteForm.submit();
-        }
+        this.$dispatch('open-confirm', {
+            title: 'Hapus Kategori',
+            message: 'Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.',
+            confirmText: 'Ya, Hapus',
+            onConfirm: () => {
+                this.isSubmitting = true;
+                this.$refs.deleteForm.submit();
+            }
+        });
     }
 }">
     @php
