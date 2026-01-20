@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ItemController;
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -29,18 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         // Items Management
         Route::prefix('/items')->name('items.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.items.index');
-            })->name('index');
-            Route::get('/create', function () {
-                return view('admin.items.create');
-            })->name('create');
-            Route::put('/{id}/edit', function () {
-                return ('edit');
-            })->name('edit');
-            Route::delete('/{id}', function () {
-                return ('delete');
-            })->name('delete');
+            Route::get('/', [ItemController::class, 'index'])->name('index');
+            Route::get('/create', [ItemController::class, 'create'])->name('create');
+            Route::post('/', [ItemController::class, 'store'])->name('store');
+            Route::put('/{item}', [ItemController::class, 'update'])->name('update');
+            Route::delete('/{item}', [ItemController::class, 'destroy'])->name('delete');
         });
 
         // Users Management

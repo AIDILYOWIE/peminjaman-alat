@@ -12,11 +12,18 @@ class Alat extends Model
     protected $table = 'alat';
 
     protected $fillable = [
+        'code',
         'kategori_id',
-        'nama_alat',
+        'nama',
         'deskripsi',
-        'stok',
-        'gambar'
+        'stock',
+        'gambar',
+        'denda'
+    ];
+
+    protected $casts = [
+        'stock' => 'integer',
+        'denda' => 'decimal:2'
     ];
 
     public function kategori()

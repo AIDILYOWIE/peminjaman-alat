@@ -6,113 +6,135 @@
 <div class="space-y-6" x-data="{ 
     detailOpen: false, 
     isEditing: false, 
+    isLoading: true,
+    isSubmitting: false,
     selectedItem: {},
     // Initializing form data
     form: {
-        name: '',
+        id: null,
+        nama: '',
         code: '',
-        category: '',
+        kategori_id: '',
+        category_name: '',
         stock: 0,
-        total_stock: 0,
-        status: '',
-        icon: ''
+        deskripsi: '',
+        gambar: '',
+        denda: 0
+    },
+    imageFile: null,
+    imageUrl: null,
+    init() {
+        // Simulate loading delay for skeleton
+        setTimeout(() => {
+            this.isLoading = false;
+        }, 1500);
+        this.$watch('form.nama', () => this.generateCode());
+        this.$watch('form.stock', () => this.generateCode());
+    },
+    generateCode() {
+        if (!this.isEditing) return;
+        if (this.form.nama && this.form.nama.length >= 2) {
+            let prefix = this.form.nama.substring(0, 2).toUpperCase();
+            this.form.code = prefix + '-' + (this.form.stock || 0);
+        }
+    },
+    handleFileSelect(e) {
+        const files = e.target.files || e.dataTransfer.files;
+        if (files.length > 0) {
+            this.imageFile = files[0];
+            if (this.imageUrl) URL.revokeObjectURL(this.imageUrl);
+            this.imageUrl = URL.createObjectURL(this.imageFile);
+        }
+    },
+    removeFile() {
+        this.imageFile = null;
+        if (this.imageUrl) {
+            URL.revokeObjectURL(this.imageUrl);
+            this.imageUrl = null;
+        }
+        if (this.isEditing) {
+            this.form.gambar = '';
+        }
+        if (this.$refs.editGambar) this.$refs.editGambar.value = '';
+    },
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     },
     openDetail(item) {
         this.selectedItem = item;
-        this.form = { ...item };
+        this.form = { 
+            ...item, 
+            category_name: item.kategori ? item.kategori.nama : 'Tanpa Kategori',
+            kategori_id: item.kategori_id
+        };
         this.detailOpen = true;
         this.isEditing = false;
     },
     closeDetail() {
         this.detailOpen = false;
         this.isEditing = false;
+        this.removeFile();
     },
     toggleEdit() {
         this.isEditing = !this.isEditing;
+        if (!this.isEditing) this.removeFile();
     },
     cancelEdit() {
-        this.form = { ...this.selectedItem };
+        this.form = { ...this.selectedItem, category_name: this.selectedItem.kategori ? this.selectedItem.kategori.nama : 'Tanpa Kategori' };
         this.isEditing = false;
+        this.removeFile();
     },
     confirmEdit() {
-        // Placeholder for update logic
-        this.selectedItem = { ...this.form };
-        this.isEditing = false;
-        // You would typically call an API here
+        this.isSubmitting = true;
+        this.$refs.editForm.submit();
+    },
+    confirmDelete() {
+        this.$dispatch('open-confirm', {
+            title: 'Hapus Alat',
+            message: 'Apakah Anda yakin ingin menghapus alat ini? Tindakan ini tidak dapat dibatalkan.',
+            confirmText: 'Ya, Hapus',
+            onConfirm: () => {
+                this.isSubmitting = true;
+                this.$refs.deleteForm.submit();
+            }
+        });
     }
 }">
     @php
     $columns = [
     [
     'label' => 'Info Alat',
-    'key' => 'name',
+    'key' => 'nama',
     'component' => 'info',
-    'map' => ['subtitle' => 'code', 'icon' => 'icon'],
+    'map' => ['subtitle' => 'code'],
     'class' => 'w-full'
     ],
     [
     'label' => 'Stok',
     'key' => 'stock',
-    'component' => 'progress',
-    'map' => ['total' => 'total_stock'],
     'align' => 'text-left',
-    'class' => 'w-full sm:min-w-[200px] xl:min-w-[500px] min-w-[150px]',
+    'class' => 'w-px whitespace-nowrap px-10'
     ],
     [
     'label' => 'Kategori',
-    'key' => 'category',
+    'key' => 'kategori.nama',
     'component' => 'badge',
-    'map' => ['color' => 'category_color'],
+    'params' => ['color' => 'indigo'],
     'hidden' => 'hidden sm:table-cell',
     'align' => 'text-center',
     'class' => 'whitespace-nowrap w-px'
     ],
     [
-    'label' => 'Status',
-    'key' => 'status',
-    'component' => 'badge',
-    'map' => ['color' => 'status_color'],
+    'label' => 'Denda',
+    'key' => 'denda',
+    'component' => 'currency',
     'hidden' => 'hidden sm:table-cell',
+    'align' => 'text-right',
     'class' => 'whitespace-nowrap w-px'
-    ],
-    ];
-
-    $items = [
-    [
-    'id' => 1,
-    'code' => 'CAM-001',
-    'name' => 'Sony Alpha a7 III',
-    'category' => 'Kamera',
-    'category_color' => 'indigo',
-    'stock' => 4,
-    'total_stock' => 5,
-    'status' => 'Tersedia',
-    'status_color' => 'green',
-    'icon' => 'heroicon-o-camera'
-    ],
-    [
-    'id' => 2,
-    'code' => 'ACC-023',
-    'name' => 'Tripod Manfrotto',
-    'category' => 'Aksesoris',
-    'category_color' => 'blue',
-    'stock' => 0,
-    'total_stock' => 3,
-    'status' => 'Kosong',
-    'status_color' => 'red',
-    'icon' => 'heroicon-o-video-camera'
-    ],
-    [
-    'id' => 3,
-    'code' => 'AUD-005',
-    'name' => 'Zoom H6 Recorder',
-    'category' => 'Audio',
-    'category_color' => 'purple',
-    'stock' => 1,
-    'total_stock' => 1,
-    'status' => 'Tersedia',
-    'status_color' => 'green',
-    'icon' => 'heroicon-o-microphone'
     ],
     ];
     @endphp
@@ -126,6 +148,7 @@
         :addButtonRoute="route('admin.items.create')"
         hasFilter="true"
         hasExport="true"
+        :loading="true"
         onRowClick="openDetail($row)" />
 
     <x-slide-over
@@ -135,7 +158,13 @@
         onClose="closeDetail()"
         onToggleEdit="toggleEdit()"
         onConfirm="confirmEdit()"
-        onCancel="cancelEdit()">
+        onCancel="cancelEdit()"
+        onDelete="confirmDelete()">
+
+        @php
+        $categories = \App\Models\Kategori::all();
+        @endphp
+
         <!-- Item Hero Section -->
         <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">
             <div class="flex items-start justify-between sm:mb-6 mb-4">
@@ -144,149 +173,138 @@
                         <x-heroicon-s-cube class="w-3 h-3" />
                         <span x-text="form.code"></span>
                     </div>
-                    <h3 class="sm:text-2xl text-xl font-bold sm:mb-2" x-text="form.name || 'Nama Alat'"></h3>
-                    <p class="text-indigo-100 sm:text-sm text-xs" x-text="form.category"></p>
+                    <h3 class="sm:text-2xl text-xl font-bold sm:mb-2" x-text="form.nama || 'Nama Alat'"></h3>
+                    <p class="text-indigo-100 sm:text-sm text-xs" x-text="form.category_name"></p>
                 </div>
-                <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                    <x-heroicon-o-camera class="w-10 h-10 text-white/80" />
+                <div class="relative flex-shrink-0 w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center overflow-hidden border-2 border-white/30 group/img transition-all"
+                    :class="isEditing ? 'cursor-pointer hover:bg-white/30' : ''"
+                    @click="isEditing && $refs.editGambar.click()">
+
+                    <!-- Remove Button (Only when editing and image exists) -->
+                    <template x-if="isEditing && (form.gambar || imageFile)">
+                        <button type="button" @click.stop="removeFile()"
+                            class="absolute cursor-pointer top-1 right-1 p-1 bg-white text-gray-500 rounded-lg shadow-lg  transition-colors z-20">
+                            <x-heroicon-m-x-mark class="w-3 h-3" />
+                        </button>
+                    </template>
+
+                    <!-- Image Display (New Preview OR Existing Image) -->
+                    <template x-if="imageUrl || (form.gambar && !imageFile)">
+                        <img :src="imageUrl ? imageUrl : '/storage/' + form.gambar" class="w-full h-full object-cover">
+                    </template>
+
+                    <!-- Icon Display (When No Image) -->
+                    <template x-if="!imageUrl && !form.gambar">
+                        <div>
+                            <template x-if="isEditing">
+                                <x-heroicon-o-plus class="w-8 h-8 text-white/50" />
+                            </template>
+                            <template x-if="!isEditing">
+                                <x-heroicon-o-camera class="w-10 h-10 text-white/50" />
+                            </template>
+                        </div>
+                    </template>
                 </div>
             </div>
 
             <!-- Quick Stats -->
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                    <div class="text-xs text-indigo-100 mb-1">Tersedia</div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
+                    <div class="text-xs text-indigo-100 mb-1">Stok</div>
                     <div class="sm:text-xl text-base font-bold" x-text="form.stock"></div>
                 </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                    <div class="text-xs text-indigo-100 mb-1">Total</div>
-                    <div class="sm:text-xl text-base font-bold" x-text="form.total_stock"></div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                    <div class="text-xs text-indigo-100 mb-1">Status</div>
-                    <div class="sm:text-xs text-base font-bold" x-text="form.status"></div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
+                    <div class="text-xs text-indigo-100 mb-1">Denda</div>
+                    <div class="sm:text-xl text-base font-bold" x-text="'Rp ' + Number(form.denda).toLocaleString()"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Form Sections -->
+        <!-- Detail Sections -->
         <div class="sm:p-6 p-3 sm:space-y-6 space-y-3">
-            <!-- Basic Information Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-information-circle class="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Informasi Dasar</h4>
-                </div>
+            <form x-ref="editForm" :action="'{{ route('admin.items.index') }}/' + form.id" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-2">Nama Alat</label>
-                        <input type="text" x-model="form.name" :disabled="!isEditing"
-                            class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:text-gray-900">
+                <!-- Hidden Input for Image -->
+                <input type="file" name="gambar" x-ref="editGambar" class="sr-only" @change="handleFileSelect($event)" accept="image/*">
+
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                            <x-heroicon-o-information-circle class="w-5 h-5 text-indigo-600" />
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-900">Informasi Alat</h4>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Kode Alat</label>
-                            <input type="text" x-model="form.code" :disabled="true"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Nama Alat</label>
+                            <input type="text" name="nama" x-model="form.nama" :disabled="!isEditing"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 @error('nama') border-red-500 @enderror">
+                            @error('nama') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
                         </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">Kode Alat</label>
+                                <input type="text" name="code" x-model="form.code" :readonly="true"
+                                    class="w-full py-2.5 bg-gray-50 rounded-xl text-sm font-medium text-gray-900 focus:outline-none transition-all @error('code') border-red-500 @enderror">
+                                @error('code') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">Kategori</label>
+                                <select name="kategori_id" x-model="form.kategori_id" :disabled="!isEditing"
+                                    class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:appearance-none @error('kategori_id') border-red-500 @enderror">
+                                    @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->nama }}</option>
+                                    @endforeach
+                                </select>
+                                @error('kategori_id') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">Stok</label>
+                                <input type="number" name="stock" x-model="form.stock" :disabled="!isEditing"
+                                    class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 @error('stock') border-red-500 @enderror">
+                                @error('stock') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">Denda / Hari</label>
+                                <template x-if="!isEditing">
+                                    <div class="py-2.5 text-sm font-medium text-gray-900" x-text="'Rp ' + Number(form.denda).toLocaleString()"></div>
+                                </template>
+                                <template x-if="isEditing">
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 text-sm">Rp</span>
+                                        </div>
+                                        <input type="number" name="denda" x-model="form.denda"
+                                            class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all @error('denda') border-red-500 @enderror">
+                                    </div>
+                                </template>
+                                @error('denda') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Kategori</label>
-                            <select x-model="form.category" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:appearance-none disabled:px-0">
-                                <option>Kamera</option>
-                                <option>Aksesoris</option>
-                                <option>Audio</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stock Management Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-cube class="w-5 h-5 text-green-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Manajemen Stok</h4>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Stok Tersedia</label>
-                            <input type="number" x-model="form.stock" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-2">Total Stok</label>
-                            <input type="number" x-model="form.total_stock" :disabled="!isEditing"
-                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-2">Status Ketersediaan</label>
-
-                        <!-- Mode View: Badge -->
-                        <div x-show="!isEditing" class="py-1">
-                            <template x-if="form.status === 'Tersedia'">
-                                <x-badge color="green" value="Tersedia" />
-                            </template>
-                            <template x-if="form.status === 'Kosong'">
-                                <x-badge color="red" value="Kosong" />
-                            </template>
-                            <template x-if="form.status === 'Maintenance'">
-                                <x-badge color="yellow" value="Maintenance" />
-                            </template>
+                            <label class="block text-xs font-semibold text-gray-500 mb-2">Deskripsi</label>
+                            <textarea name="deskripsi" x-model="form.deskripsi" :disabled="!isEditing" rows="3"
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 @error('deskripsi') border-red-500 @enderror"></textarea>
+                            @error('deskripsi') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
                         </div>
 
-                        <!-- Mode Edit: Select -->
-                        <select x-show="isEditing" x-model="form.status"
-                            class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                            :class="{
-                                        'text-green-700': form.status === 'Tersedia',
-                                        'text-red-700': form.status === 'Kosong',
-                                        'text-yellow-700': form.status === 'Maintenance'
-                                    }">
-                            <option value="Tersedia">Tersedia</option>
-                            <option value="Kosong">Kosong</option>
-                            <option value="Maintenance">Maintenance</option>
-                        </select>
                     </div>
                 </div>
-            </div>
+            </form>
 
-            <!-- Photo Upload Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-photo class="w-5 h-5 text-purple-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Foto Alat</h4>
-                </div>
-
-                <div class="aspect-video relative rounded-xl bg-white flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-200 group hover:border-indigo-300 transition-colors">
-                    <div class="flex flex-col items-center gap-3 text-gray-400">
-                        <x-heroicon-o-camera class="w-12 h-12" />
-                        <div class="text-center">
-                            <p class="text-sm font-medium text-gray-900" x-text="form.name"></p>
-                            <p class="text-xs text-gray-500 mt-1">Belum ada foto</p>
-                        </div>
-                    </div>
-                    <div x-show="isEditing"
-                        class="absolute inset-0 bg-gradient-to-t from-indigo-600/90 to-indigo-600/70 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                        <button class="bg-white text-indigo-600 text-sm font-bold px-6 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
-                            <x-heroicon-o-arrow-up-tray class="w-4 h-4" />
-                            Upload Foto
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <!-- Hidden Delete Form -->
+            <form x-ref="deleteForm" :action="'{{ route('admin.items.index') }}/' + form.id" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
         </div>
     </x-slide-over>
 </div>
