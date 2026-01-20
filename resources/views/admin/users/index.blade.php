@@ -98,7 +98,8 @@
         hasFilter="true"
         hasExport="true"
         :loading="true"
-        onRowClick="openDetail($row)" />
+        onRowClick="openDetail($row)"
+        :exportRoute="route('admin.users.export')" />
 
     <x-slide-over
         open="detailOpen"
