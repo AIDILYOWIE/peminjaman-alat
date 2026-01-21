@@ -12,14 +12,14 @@
 
 <div class="space-y-1.5">
     @if($label)
-    <label for="{{ $name }}" class="block text-sm font-medium text-gray-700">
+    <label for="{{ $name }}" class="block text-xs font-semibold text-gray-500 mb-2">
         {{ $label }} @if($required)<span class="text-red-500">*</span>@endif
     </label>
     @endif
 
     <div class="relative group">
         @if($icon)
-        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:appearance-none">
             <x-dynamic-component :component="$icon" class="h-4 w-4" />
         </div>
         @endif

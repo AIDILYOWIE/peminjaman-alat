@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\BorrowingController;
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -29,7 +30,17 @@ Route::middleware('auth')->group(function () {
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
-        // Items Management
+        // Borrowings Management
+        Route::prefix('/borrowings')->name('borrowings.')->group(function () {
+            Route::get('/', [BorrowingController::class, 'index'])->name('index');
+            Route::get('/create', [BorrowingController::class, 'create'])->name('create');
+            Route::post('/', [BorrowingController::class, 'store'])->name('store');
+            Route::put('/{borrowing}', [BorrowingController::class, 'update'])->name('update');
+            Route::patch('/{borrowing}/status', [BorrowingController::class, 'updateStatus'])->name('update_status');
+            Route::delete('/{borrowing}', [BorrowingController::class, 'destroy'])->name('delete');
+        });
+
+        // Items Management (Alat)
         Route::prefix('/items')->name('items.')->group(function () {
             Route::get('/export', [ItemController::class, 'export'])->name('export');
             Route::get('/', [ItemController::class, 'index'])->name('index');
@@ -58,16 +69,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
             Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
             Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('delete');
-        });
-
-        // Borrowings Management
-        Route::prefix('/borrowings')->name('borrowings.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.borrowings.index');
-            })->name('index');
-            Route::get('/create', function () {
-                return view('admin.borrowings.create');
-            })->name('create');
         });
 
         // Returns Management

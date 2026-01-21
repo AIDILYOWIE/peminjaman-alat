@@ -174,7 +174,7 @@
                         <x-heroicon-s-cube class="w-3 h-3" />
                         <span x-text="form.code"></span>
                     </div>
-                    <h3 class="sm:text-2xl text-xl font-bold sm:mb-2" x-text="form.nama || 'Nama Alat'"></h3>
+                    <h3 class="sm:text-2xl text-xl font-bold" x-text="form.nama || 'Nama Alat'"></h3>
                     <p class="text-indigo-100 sm:text-sm text-xs" x-text="form.category_name"></p>
                 </div>
                 <div class="relative flex-shrink-0 w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center overflow-hidden border-2 border-white/30 group/img transition-all"

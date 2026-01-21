@@ -1,20 +1,30 @@
 @props([
 'label' => 'List Alat',
 'tools' => [], // Array of tool options [id => name]
-'name' => 'items'
+'name' => 'items',
+'value' => null
 ])
 
-<div class="space-y-4" x-data="{
-    rows: [{ alat_id: '', jumlah: 1 }],
-    addRow() {
-        this.rows.push({ alat_id: '', jumlah: 1 });
-    },
-    removeRow(index) {
-        if (this.rows.length > 1) {
-            this.rows.splice(index, 1);
+<div {{ $attributes->merge(['class' => 'space-y-4']) }}
+    x-data="{
+        rows: @js($value ?? [['alat_id' => '', 'jumlah' => 1]]),
+        populate(data) {
+            if (data && Array.isArray(data) && data.length > 0) {
+                this.rows = data.map(item => ({
+                    alat_id: item.alat_id ? item.alat_id.toString() : '',
+                    jumlah: item.jumlah || 1
+                }));
+            }
+        },
+        addRow() {
+            this.rows.push({ alat_id: '', jumlah: 1 });
+        },
+        removeRow(index) {
+            if (this.rows.length > 1) {
+                this.rows.splice(index, 1);
+            }
         }
-    }
-}">
+    }">
     <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-4">
         <label class="block text-sm font-bold text-gray-800">
             {{ $label }}
@@ -30,20 +40,20 @@
 
     <div class="space-y-4">
         <template x-for="(row, index) in rows" :key="index">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start bg-gray-50/50 p-4 rounded-xl border border-gray-100 relative group">
+            <div class="grid grid-cols-1 gap-3 items-start bg-gray-50/50 p-4 rounded-xl border border-gray-100 relative group">
                 {{-- Tool Selection --}}
                 <div class="col-span-1 md:col-span-8">
                     <label :for="'alat_' + index" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 px-1">Nama Alat</label>
                     <div class="relative">
                         <select
                             :id="'alat_' + index"
-                            :name=\"'{{ $name }}[' + index + '][alat_id]' \"
+                            :name="'{{ $name }}[' + index + '][alat_id]'"
                             x-model="row.alat_id"
                             required
                             class="block w-full  border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-gray-50 border">
                             <option value="" disabled selected>Pilih Alat...</option>
                             @foreach($tools as $id => $toolName)
-                            <option value="{{ $id }}">{{ $toolName }}</option>
+                            <option value="{{ (string)$id }}">{{ $toolName }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -62,11 +72,11 @@
                         <input
                             :id="'qty_' + index"
                             type="number"
-                            :name=\"'{{ $name }}[' + index + '][jumlah]' \"
+                            :name="'{{ $name }}[' + index + '][jumlah]'"
                             x-model.number="row.jumlah"
                             min="1"
                             required
-                            class="block w-full text-center border-gray-200 rounded-lg text-sm font-bold focus:ring-indigo-500 focus:border-indigo-500 py-2.5 bg-white border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            class="block w-full text-center border-gray-200 rounded-lg text-sm font-semibold focus:ring-indigo-500 focus:border-indigo-500 py-2.5 bg-white border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                         <button
                             type="button"
                             @click="row.jumlah++"

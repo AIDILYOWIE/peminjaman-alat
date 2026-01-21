@@ -12,7 +12,7 @@
 
 <div class="space-y-1.5">
     @if($label)
-    <label for="{{ $name }}" class="block text-sm font-medium text-gray-700">
+    <label for="{{ $name }}" class="block text-xs font-semibold text-gray-500 mb-2">
         {{ $label }} @if($required)<span class="text-red-500">*</span>@endif
     </label>
     @endif
@@ -38,7 +38,7 @@
             id="{{ $name }}"
             {{ $required ? 'required' : '' }}
             {{ $disabled ? 'disabled' : '' }}
-            {!! $attributes->merge(['class' => 'block w-full border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-white border transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:appearance-none disabled:text-gray-900' . ($icon ? ' pl-10' : '')]) !!}
+            {!! $attributes->merge(['class' => 'block w-full border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-white border transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:appearance-none disabled:text-gray-900 disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:appearance-none' . ($icon ? ' pl-10' : '')]) !!}
             @if($attributes->has('::disabled'))
             :class="{ 'pl-10': !({!! $attributes->get('::disabled') !!}), 'pl-0': {!! $attributes->get('::disabled') !!} }"
             @endif
