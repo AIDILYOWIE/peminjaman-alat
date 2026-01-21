@@ -52,11 +52,17 @@ class BorrowingRepository
     }
 
     /**
-     * Get paginated borrowings with optional status filter.
+     * Get paginated borrowings with optional status and due date filter.
      */
-    public function getPaginatedFiltered(int $perPage = 10, ?string $search = null, ?string $status = null): LengthAwarePaginator
+    public function getPaginatedFiltered(int $perPage = 10, ?string $search = null, ?string $status = null, bool $dueOnly = false): LengthAwarePaginator
     {
-        return $this->applyFilters(Peminjaman::query(), $search, $status)->paginate($perPage);
+        $query = $this->applyFilters(Peminjaman::query(), $search, $status);
+
+        if ($dueOnly) {
+            $query->whereDate('tgl_pengembalian', '<=', now());
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**

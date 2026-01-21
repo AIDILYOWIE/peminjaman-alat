@@ -153,14 +153,19 @@
         form.submit();
     },
     calculateLiveFine() {
-        const deadline = new Date(this.form.return_date_iso);
-        const now = new Date();
-        const diffMs = now - deadline;
+        if (!this.form.return_date_iso) return;
         
-        if (diffMs > 0) {
-            // Convert ms to minutes (rounded up)
-            const diffMins = Math.ceil(diffMs / (1000 * 60));
-            this.form.live_fine = diffMins * (this.form.total_fine_rate || 0);
+        const deadline = new Date(this.form.return_date_iso);
+        deadline.setHours(0, 0, 0, 0);
+        
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        const diffTime = now - deadline;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 0) {
+            this.form.live_fine = diffDays * (this.form.total_fine_rate || 0);
         } else {
             this.form.live_fine = 0;
         }

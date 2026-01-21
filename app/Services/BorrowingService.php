@@ -40,9 +40,9 @@ class BorrowingService
     /**
      * Get currently borrowed items available for return.
      */
-    public function getActiveBorrowings(int $perPage = 10, ?string $search = null): LengthAwarePaginator
+    public function getActiveBorrowings(int $perPage = 10, ?string $search = null, bool $dueOnly = false): LengthAwarePaginator
     {
-        return $this->borrowingRepository->getPaginatedFiltered($perPage, $search, 'dipinjam');
+        return $this->borrowingRepository->getPaginatedFiltered($perPage, $search, 'dipinjam', $dueOnly);
     }
 
     /**
@@ -163,10 +163,10 @@ class BorrowingService
                 /** @var \Carbon\Carbon $deadline */
                 $deadline = $peminjaman->tgl_pengembalian->startOfDay();
                 /** @var \Carbon\Carbon $now */
-                $now = now();
+                $now = now()->startOfDay();
                 if ($now->greaterThan($deadline)) {
-                    $diffMins = ceil($now->diffInMinutes($deadline));
-                    $updateData['denda'] = $diffMins * $peminjaman->getTotalTarifDenda();
+                    $diffDays = $now->diffInDays($deadline);
+                    $updateData['denda'] = $diffDays * $peminjaman->getTotalTarifDenda();
                 }
             }
 
