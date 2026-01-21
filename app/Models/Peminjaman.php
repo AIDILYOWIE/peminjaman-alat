@@ -20,6 +20,11 @@ class Peminjaman extends Model
         'status'
     ];
 
+    protected $casts = [
+        'tgl_pengembalian' => 'date',
+        'tgl_pinjam' => 'date',
+    ];
+
     public function peminjam()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -33,5 +38,18 @@ class Peminjaman extends Model
     public function details()
     {
         return $this->hasMany(DetailPeminjaman::class);
+    }
+
+    public function getSisaDurasi()
+    {
+        if (!$this->tgl_pengembalian) return 0;
+        return (int) now()->startOfDay()->diffInDays($this->tgl_pengembalian->startOfDay(), false);
+    }
+
+    public function getTotalTarifDenda()
+    {
+        return $this->details->sum(function ($detail) {
+            return $detail->alat->denda * $detail->jumlah;
+        });
     }
 }
