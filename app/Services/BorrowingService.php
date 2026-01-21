@@ -29,6 +29,14 @@ class BorrowingService
     }
 
     /**
+     * Get all borrowings for export.
+     */
+    public function exportBorrowings(?string $search = null): \Illuminate\Support\Collection
+    {
+        return $this->borrowingRepository->getAllFiltered($search);
+    }
+
+    /**
      * Store a new borrowing transaction.
      */
     public function storeBorrowing(array $data): Peminjaman
@@ -135,7 +143,9 @@ class BorrowingService
                 }
 
                 // Final fine snapshot
+                /** @var \Carbon\Carbon $deadline */
                 $deadline = $peminjaman->tgl_pengembalian->startOfDay();
+                /** @var \Carbon\Carbon $now */
                 $now = now();
                 if ($now->greaterThan($deadline)) {
                     $diffMins = ceil($now->diffInMinutes($deadline));

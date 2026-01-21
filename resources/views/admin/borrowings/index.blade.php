@@ -152,6 +152,7 @@
         searchPlaceholder="Cari peminjaman..."
         hasFilter="true"
         hasExport="true"
+        :exportRoute="route('admin.borrowings.export')"
         onRowClick="openDetail($row)"
         addButtonText="Tambah"
         :addButtonRoute="route('admin.borrowings.create')" />
@@ -164,7 +165,8 @@
         onToggleEdit="toggleEdit()"
         onConfirm="confirmEdit()"
         onCancel="cancelEdit()"
-        onDelete="confirmDelete()">
+        onDelete="confirmDelete()"
+        hasActions="form.status === 'pending'">
 
         <!-- Header: Hero Status -->
         <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">

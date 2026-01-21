@@ -13,7 +13,23 @@ class BorrowingRepository
      */
     public function getAllPaginated(int $perPage = 10, ?string $search = null): LengthAwarePaginator
     {
-        $query = Peminjaman::with(['peminjam', 'petugas', 'details.alat.kategori'])
+        return $this->applyFilters(Peminjaman::query(), $search)->paginate($perPage);
+    }
+
+    /**
+     * Get all borrowings with relationships for export.
+     */
+    public function getAllFiltered(?string $search = null): Collection
+    {
+        return $this->applyFilters(Peminjaman::query(), $search)->get();
+    }
+
+    /**
+     * Apply common filters for borrowings.
+     */
+    protected function applyFilters($query, ?string $search = null)
+    {
+        $query->with(['peminjam', 'petugas', 'details.alat.kategori'])
             ->latest();
 
         if ($search) {
@@ -26,7 +42,7 @@ class BorrowingRepository
             });
         }
 
-        return $query->paginate($perPage);
+        return $query;
     }
 
     /**

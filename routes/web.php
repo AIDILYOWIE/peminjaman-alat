@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         // Borrowings Management
         Route::prefix('/borrowings')->name('borrowings.')->group(function () {
+            Route::get('/export', [BorrowingController::class, 'export'])->name('export');
             Route::get('/', [BorrowingController::class, 'index'])->name('index');
             Route::get('/create', [BorrowingController::class, 'create'])->name('create');
             Route::post('/', [BorrowingController::class, 'store'])->name('store');

@@ -17,7 +17,8 @@ class Peminjaman extends Model
         'tgl_pengembalian',
         'tgl_pinjam',
         'denda',
-        'status'
+        'status',
+        'keterangan'
     ];
 
     protected $casts = [

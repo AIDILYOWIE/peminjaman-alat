@@ -2,13 +2,17 @@
 'open' => 'false',
 'title' => 'Detail',
 'isEditing' => 'false',
-'hasActions' => true,
+'hasActions' => 'true',
 'onClose' => '',
 'onToggleEdit' => '',
 'onConfirm' => '',
 'onCancel' => '',
 'onDelete' => '',
 ])
+
+@php
+$showActions = is_bool($hasActions) ? ($hasActions ? 'true' : 'false') : $hasActions;
+@endphp
 
 <div x-show="{{ $open }}"
     class="fixed inset-0 z-50 overflow-hidden"
@@ -61,9 +65,9 @@
                     </div>
                     <div class="flex items-center sm:gap-2 sm:gap-1">
                         <!-- View Mode Actions -->
-                        @if($hasActions)
+                        @if($showActions !== 'false')
                         <div class="flex items-center gap-2"
-                            x-show="!{{ $isEditing }}"
+                            x-show="!{{ $isEditing }} && {{ $showActions }}"
                             x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 scale-95"
                             x-transition:enter-end="opacity-100 scale-100"
@@ -80,9 +84,9 @@
                         @endif
 
                         <!-- Edit Mode Actions -->
-                        @if($hasActions)
+                        @if($showActions !== 'false')
                         <div class="flex items-center gap-2"
-                            x-show="{{ $isEditing }}"
+                            x-show="{{ $isEditing }} && {{ $showActions }}"
                             x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 translate-x-4"
                             x-transition:enter-end="opacity-100 translate-x-0"

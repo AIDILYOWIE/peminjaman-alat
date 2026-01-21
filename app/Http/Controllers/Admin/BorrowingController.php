@@ -10,6 +10,8 @@ use App\Services\BorrowingService;
 use App\Http\Requests\Admin\BorrowingRequest;
 use Illuminate\Http\Request;
 use Exception;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\BorrowingExport;
 
 class BorrowingController extends Controller
 {
@@ -126,5 +128,11 @@ class BorrowingController extends Controller
             'ditolak' => ['label' => 'Ditolak', 'color' => 'red'],
             default => ['label' => $status, 'color' => 'gray'],
         };
+    }
+
+    public function export(Request $request)
+    {
+        $borrowings = $this->borrowingService->exportBorrowings($request->search);
+        return Excel::download(new BorrowingExport($borrowings), 'data-peminjaman-' . date('Y-m-d') . '.xlsx');
     }
 }
