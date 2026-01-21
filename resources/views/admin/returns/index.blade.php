@@ -20,7 +20,9 @@
         staff_name: '-',
         note: '',
         status_label: 'Dipinjam',
-        status_color: 'indigo'
+        total_fine_rate: 0,
+        return_date_iso: '',
+        live_fine: 0
     },
     activeBorrowings: [],
     searchActive: '',
@@ -28,6 +30,12 @@
     init() {
         setTimeout(() => {
             this.isLoading = false;
+        }, 1000);
+
+        setInterval(() => {
+            if (this.detailOpen) {
+                this.calculateLiveFine();
+            }
         }, 1000);
     },
     openDetail(item) {
@@ -83,6 +91,24 @@
         form.appendChild(idInput);
         document.body.appendChild(form);
         form.submit();
+    },
+    calculateLiveFine() {
+        if (!this.form.return_date_iso) return;
+        
+        const deadline = new Date(this.form.return_date_iso);
+        deadline.setHours(0, 0, 0, 0);
+        
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        const diffTime = now - deadline;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 0) {
+            this.form.live_fine = diffDays * (this.form.total_fine_rate || 0);
+        } else {
+            this.form.live_fine = 0;
+        }
     }
 }">
     @php
@@ -126,7 +152,7 @@
     <!-- Detail History Slide-over -->
     <x-slide-over
         open="detailOpen"
-        title="Detail Peminjaman"
+        title="Pengembalian"
         onClose="closeDetail()"
         :hasActions="false">
 
@@ -148,7 +174,7 @@
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                     <div class="text-xs text-indigo-100 mb-1">Denda Saat Ini</div>
-                    <div class="sm:text-lg text-base font-bold" x-text="'Rp ' + (form.fine || 0).toLocaleString('id-ID')"></div>
+                    <div class="sm:text-lg text-base font-bold" x-text="'Rp ' + (this.form.live_fine || form.fine || 0).toLocaleString('id-ID')"></div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                     <div class="text-xs text-emerald-100 mb-1">Total Qty</div>

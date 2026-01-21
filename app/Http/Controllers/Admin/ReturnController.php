@@ -21,7 +21,7 @@ class ReturnController extends Controller
      */
     public function index(Request $request)
     {
-        $returns = $this->borrowingService->getActiveBorrowings(10, $request->search);
+        $returns = $this->borrowingService->getActiveBorrowings(10, $request->search, true);
 
         $returns->getCollection()->transform(function ($item) {
             return [
@@ -32,7 +32,9 @@ class ReturnController extends Controller
                 'qty' => $item->details->sum('jumlah'),
                 'borrow_date' => $item->tgl_pinjam ? $item->tgl_pinjam->format('d M Y') : '-',
                 'return_date' => $item->tgl_pengembalian->format('d M Y'),
-                'fine' => $item->denda ?? 0,
+                'fine' => $item->getSisaDurasi() < 0 ? abs($item->getSisaDurasi()) * $item->getTotalTarifDenda() : 0,
+                'total_fine_rate' => $item->getTotalTarifDenda(),
+                'return_date_iso' => $item->tgl_pengembalian->toIso8601String(),
                 'staff_name' => $item->petugas->username ?? '-',
                 'note' => $item->keterangan ?? '-',
             ];
@@ -51,7 +53,7 @@ class ReturnController extends Controller
      */
     public function create(Request $request)
     {
-        $activeBorrowings = $this->borrowingService->getActiveBorrowings(10, $request->search);
+        $activeBorrowings = $this->borrowingService->getActiveBorrowings(10, $request->search, true);
 
         $activeBorrowings->getCollection()->transform(function ($item) {
             return [
