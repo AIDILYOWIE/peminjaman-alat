@@ -135,4 +135,19 @@ class BorrowingController extends Controller
         $borrowings = $this->borrowingService->exportBorrowings($request->search);
         return Excel::download(new BorrowingExport($borrowings), 'data-peminjaman-' . date('Y-m-d') . '.xlsx');
     }
+
+    public function reschedule(Request $request, Peminjaman $borrowing)
+    {
+        $request->validate([
+            'tgl_pengembalian' => 'required|date',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        try {
+            $this->borrowingService->rescheduleBorrowing($borrowing, $request->only(['tgl_pengembalian', 'keterangan']));
+            return back()->with('success', 'Penyesuaian jadwal berhasil disimpan.');
+        } catch (Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
 }

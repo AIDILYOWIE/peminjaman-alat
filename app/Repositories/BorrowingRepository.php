@@ -27,22 +27,36 @@ class BorrowingRepository
     /**
      * Apply common filters for borrowings.
      */
-    protected function applyFilters($query, ?string $search = null)
+    protected function applyFilters($query, ?string $search = null, ?string $status = null)
     {
         $query->with(['peminjam', 'petugas', 'details.alat.kategori'])
             ->latest();
 
+        if ($status) {
+            $query->where('status', $status);
+        }
+
         if ($search) {
-            $query->whereHas('peminjam', function ($q) use ($search) {
-                $q->where('username', 'like', "%{$search}%")
-                    ->orWhere('no_induk', 'like', "%{$search}%");
-            })->orWhereHas('details.alat', function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('peminjam', function ($q) use ($search) {
+                    $q->where('username', 'like', "%{$search}%")
+                        ->orWhere('no_induk', 'like', "%{$search}%");
+                })->orWhereHas('details.alat', function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%");
+                });
             });
         }
 
         return $query;
+    }
+
+    /**
+     * Get paginated borrowings with optional status filter.
+     */
+    public function getPaginatedFiltered(int $perPage = 10, ?string $search = null, ?string $status = null): LengthAwarePaginator
+    {
+        return $this->applyFilters(Peminjaman::query(), $search, $status)->paginate($perPage);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Peminjaman;
 use App\Models\Alat;
 use App\Repositories\BorrowingRepository;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Exception;
@@ -21,15 +22,31 @@ class BorrowingService
     }
 
     /**
-     * Get paginated borrowings.
+     * Get all borrowings with pagination.
      */
-    public function getAllBorrowings(int $perPage = 10, ?string $search = null)
+    public function getAllBorrowings(int $perPage = 10, ?string $search = null): LengthAwarePaginator
     {
         return $this->borrowingRepository->getAllPaginated($perPage, $search);
     }
 
     /**
-     * Get all borrowings for export.
+     * Get only returned borrowings (history).
+     */
+    public function getReturnsHistory(int $perPage = 10, ?string $search = null): LengthAwarePaginator
+    {
+        return $this->borrowingRepository->getPaginatedFiltered($perPage, $search, 'selesai');
+    }
+
+    /**
+     * Get currently borrowed items available for return.
+     */
+    public function getActiveBorrowings(int $perPage = 10, ?string $search = null): LengthAwarePaginator
+    {
+        return $this->borrowingRepository->getPaginatedFiltered($perPage, $search, 'dipinjam');
+    }
+
+    /**
+     * Get borrowings for export.
      */
     public function exportBorrowings(?string $search = null): \Illuminate\Support\Collection
     {
@@ -171,5 +188,13 @@ class BorrowingService
             }
             return $this->borrowingRepository->delete($peminjaman);
         });
+    }
+
+    public function rescheduleBorrowing(Peminjaman $borrowing, array $data): bool
+    {
+        return $this->borrowingRepository->update($borrowing, [
+            'tgl_pengembalian' => $data['tgl_pengembalian'],
+            'keterangan' => $data['keterangan'] ?? $borrowing->keterangan,
+        ]);
     }
 }

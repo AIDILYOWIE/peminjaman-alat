@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BorrowingController;
+use App\Http\Controllers\Admin\ReturnController;
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -38,6 +39,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [BorrowingController::class, 'store'])->name('store');
             Route::put('/{borrowing}', [BorrowingController::class, 'update'])->name('update');
             Route::patch('/{borrowing}/status', [BorrowingController::class, 'updateStatus'])->name('update_status');
+            Route::patch('/{borrowing}/reschedule', [BorrowingController::class, 'reschedule'])->name('reschedule');
             Route::delete('/{borrowing}', [BorrowingController::class, 'destroy'])->name('delete');
         });
 
@@ -74,9 +76,9 @@ Route::middleware('auth')->group(function () {
 
         // Returns Management
         Route::prefix('/returns')->name('returns.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.returns.index');
-            })->name('index');
+            Route::get('/', [ReturnController::class, 'index'])->name('index');
+            Route::get('/create', [ReturnController::class, 'create'])->name('create');
+            Route::post('/', [ReturnController::class, 'store'])->name('store');
         });
     });
 

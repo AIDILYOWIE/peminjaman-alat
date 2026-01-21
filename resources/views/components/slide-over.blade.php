@@ -95,7 +95,7 @@ $showActions = is_bool($hasActions) ? ($hasActions ? 'true' : 'false') : $hasAct
                             x-transition:leave-end="opacity-0 translate-x-4">
                             <button @click="{{ $onConfirm }}"
                                 :disabled="typeof isSubmitting !== 'undefined' && isSubmitting"
-                                class="cursor-pointer sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-white bg-indigo-600 sm:rounded-xl rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                                class="cursor-pointer px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 sm:rounded-xl rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2">
                                 <template x-if="typeof isSubmitting === 'undefined' || !isSubmitting">
                                     <span>Konfirmasi</span>
                                 </template>
@@ -109,9 +109,16 @@ $showActions = is_bool($hasActions) ? ($hasActions ? 'true' : 'false') : $hasAct
                                     </div>
                                 </template>
                             </button>
-                            <button @click="{{ $onCancel }}" class="cursor-pointer sm:px-4 sm:py-2 px-3 py-1.5 sm:text-sm text-xs font-semibold text-gray-700 bg-white border border-gray-200 sm:rounded-xl rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm active:scale-95">
+                            <button @click="{{ $onCancel }}" class="cursor-pointer px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-200 sm:rounded-xl rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm active:scale-95">
                                 Batal
                             </button>
+                        </div>
+                        @endif
+
+                        {{-- External Actions Slot --}}
+                        @if(isset($headerActions))
+                        <div class="flex items-center gap-2">
+                            {{ $headerActions }}
                         </div>
                         @endif
 
