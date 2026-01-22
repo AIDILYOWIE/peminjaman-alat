@@ -24,11 +24,13 @@ class ItemService
      * Get all items, using cache if available.
      *
      * @param int $perPage
+     * @param string|null $search
+     * @param int|null $categoryId
      * @return LengthAwarePaginator
      */
-    public function getAllItems(int $perPage = 5, ?string $search = null): LengthAwarePaginator
+    public function getAllItems(int $perPage = 5, ?string $search = null, ?int $categoryId = null): LengthAwarePaginator
     {
-        return $this->itemRepository->getAllPaginated($perPage, $search);
+        return $this->itemRepository->getAllPaginated($perPage, $search, $categoryId);
     }
 
     public function exportItems(?string $search = null): \Illuminate\Support\Collection

@@ -24,7 +24,7 @@ class BorrowingController extends Controller
 
     public function index(Request $request)
     {
-        $borrowings = $this->borrowingService->getAllBorrowings(10, $request->search);
+        $borrowings = $this->borrowingService->getAllBorrowings(5, $request->search);
 
         // Transform for frontend standard
         $borrowings->getCollection()->transform(function ($item) {

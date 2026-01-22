@@ -23,7 +23,7 @@ class ReturnController extends Controller
     public function index(Request $request)
     {
         // Get active borrowings (status 'dipinjam') that are due today or overdue
-        $borrowings = $this->borrowingService->getActiveBorrowings(10, $request->search, true);
+        $borrowings = $this->borrowingService->getActiveBorrowings(5, $request->search, true);
 
         // Transform for UI
         $borrowings->getCollection()->transform(function ($item) {

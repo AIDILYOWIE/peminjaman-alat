@@ -12,9 +12,11 @@ class ItemRepository
      * Get all items with categories, paginated.
      *
      * @param int $perPage
+     * @param string|null $search
+     * @param int|null $categoryId
      * @return LengthAwarePaginator
      */
-    public function getAllPaginated(int $perPage = 10, ?string $search = null): LengthAwarePaginator
+    public function getAllPaginated(int $perPage = 10, ?string $search = null, ?int $categoryId = null): LengthAwarePaginator
     {
         $query = Alat::with('kategori')->latest();
 
@@ -23,6 +25,10 @@ class ItemRepository
                 $q->where('nama', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%");
             });
+        }
+
+        if ($categoryId) {
+            $query->where('kategori_id', $categoryId);
         }
 
         return $query->paginate($perPage);

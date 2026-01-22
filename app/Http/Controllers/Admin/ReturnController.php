@@ -21,7 +21,7 @@ class ReturnController extends Controller
      */
     public function index(Request $request)
     {
-        $returns = $this->borrowingService->getActiveBorrowings(10, $request->search, true);
+        $returns = $this->borrowingService->getActiveBorrowings(5, $request->search, true);
 
         $returns->getCollection()->transform(function ($item) {
             return [
@@ -53,7 +53,7 @@ class ReturnController extends Controller
      */
     public function create(Request $request)
     {
-        $activeBorrowings = $this->borrowingService->getActiveBorrowings(10, $request->search, true);
+        $activeBorrowings = $this->borrowingService->getActiveBorrowings(5, $request->search, true);
 
         $activeBorrowings->getCollection()->transform(function ($item) {
             return [

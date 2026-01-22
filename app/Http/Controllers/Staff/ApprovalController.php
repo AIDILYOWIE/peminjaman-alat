@@ -23,7 +23,7 @@ class ApprovalController extends Controller
     public function index(Request $request)
     {
         // Get pending borrowings
-        $borrowings = $this->borrowingService->getPaginatedPending(10, $request->search);
+        $borrowings = $this->borrowingService->getPaginatedPending(5, $request->search);
 
         // Stats for cards
         $stats = [

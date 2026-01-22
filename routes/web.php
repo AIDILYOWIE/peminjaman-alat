@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\BorrowingController;
 use App\Http\Controllers\Admin\ReturnController;
 use App\Http\Controllers\Staff\ApprovalController;
 use App\Http\Controllers\Staff\ReturnController as StaffReturnController;
+use App\Http\Controllers\User\BorrowController;
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -86,9 +87,7 @@ Route::middleware('auth')->group(function () {
 
     // User Routes (Borrowing)
     Route::prefix('borrow')->name('user.borrow.')->middleware('role:peminjam')->group(function () {
-        Route::get('/', function () {
-            return view('user.borrow.index');
-        })->name('index');
+        Route::get('/', [BorrowController::class, 'index'])->name('index');
     });
 
     // Staff Routes (Approvals & Returns)

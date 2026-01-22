@@ -70,35 +70,6 @@
         this.isEditing = false;
         this.isRescheduling = false;
     },
-    updateStatus(newStatus) {
-        if (!confirm('Apakah Anda yakin ingin mengubah status peminjaman ini?')) return;
-        
-        this.isSubmitting = true;
-        let form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/borrowings/${this.form.id}/status`;
-        
-        let csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = '{{ csrf_token() }}';
-        
-        let method = document.createElement('input');
-        method.type = 'hidden';
-        method.name = '_method';
-        method.value = 'PATCH';
-        
-        let statusInput = document.createElement('input');
-        statusInput.type = 'hidden';
-        statusInput.name = 'status';
-        statusInput.value = newStatus;
-        
-        form.appendChild(csrf);
-        form.appendChild(method);
-        form.appendChild(statusInput);
-        document.body.appendChild(form);
-        form.submit();
-    },
     confirmDelete() {
         this.$dispatch('open-confirm', {
             title: 'Hapus Peminjaman',
