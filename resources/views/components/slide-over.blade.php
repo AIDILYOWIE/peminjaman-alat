@@ -3,6 +3,7 @@
 'title' => 'Detail',
 'isEditing' => 'false',
 'hasActions' => 'true',
+'hasDelete' => 'true',
 'onClose' => '',
 'onToggleEdit' => '',
 'onConfirm' => '',
@@ -77,7 +78,7 @@ $showActions = is_bool($hasActions) ? ($hasActions ? 'true' : 'false') : $hasAct
                             <button @click="{{ $onToggleEdit }}" class="cursor-pointer p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 active:scale-90" title="Edit">
                                 <x-heroicon-o-pencil-square class="w-5 h-5" />
                             </button>
-                            <button @click="{{ $onDelete }}" class="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-90" title="Hapus">
+                            <button x-show="{{ $hasDelete }}" @click="{{ $onDelete }}" class="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 active:scale-90" title="Hapus">
                                 <x-heroicon-o-trash class="w-5 h-5" />
                             </button>
                         </div>

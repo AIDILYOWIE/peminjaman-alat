@@ -42,12 +42,6 @@
         this.$refs.editForm.submit();
     },
     confirmDelete() {
-        if (this.form.alat_count > 0) {
-            // Using a custom message or alert but UI consistent is better here
-            alert('Kategori tidak dapat dihapus karena masih memiliki alat terkait.'); 
-            return;
-        }
-
         this.$dispatch('open-confirm', {
             title: 'Hapus Kategori',
             message: 'Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.',
@@ -97,7 +91,8 @@
         onToggleEdit="toggleEdit()"
         onConfirm="confirmEdit()"
         onCancel="cancelEdit()"
-        onDelete="confirmDelete()">
+        onDelete="confirmDelete()"
+        hasDelete="form.alat_count === 0">
         <!-- Category Hero Section -->
         <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 p-8 text-white">
             <div class="flex items-start justify-between mb-6">
