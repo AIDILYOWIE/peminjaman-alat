@@ -49,6 +49,8 @@ Route::middleware('auth')->group(function () {
         // Items Management (Alat)
         Route::prefix('/items')->name('items.')->group(function () {
             Route::get('/export', [ItemController::class, 'export'])->name('export');
+            Route::post('/import', [ItemController::class, 'import'])->name('import');
+            Route::get('/template', [ItemController::class, 'downloadTemplate'])->name('template');
             Route::get('/', [ItemController::class, 'index'])->name('index');
             Route::get('/create', [ItemController::class, 'create'])->name('create');
             Route::post('/', [ItemController::class, 'store'])->name('store');
@@ -69,6 +71,8 @@ Route::middleware('auth')->group(function () {
         // Categories Management
         Route::prefix('/categories')->name('categories.')->group(function () {
             Route::get('/export', [CategoryController::class, 'export'])->name('export');
+            Route::post('/import', [CategoryController::class, 'import'])->name('import');
+            Route::get('/template', [CategoryController::class, 'downloadTemplate'])->name('template');
             Route::get('/', [CategoryController::class, 'index'])->name('index');
             Route::get('/create', [CategoryController::class, 'create'])->name('create');
             Route::post('/', [CategoryController::class, 'store'])->name('store');

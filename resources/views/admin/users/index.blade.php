@@ -104,9 +104,10 @@
         addButtonText="Tambah"
         :addButtonRoute="route('admin.users.create')"
         hasFilter="true"
-        hasExport="true"
+        hasExport="false"
         :loading="true"
         onRowClick="openDetail($row)"
+        canExport="true"
         :exportRoute="route('admin.users.export')" />
 
     <x-slide-over
@@ -118,8 +119,7 @@
         onConfirm="confirmEdit()"
         onCancel="cancelEdit()"
         onDelete="confirmDelete()"
-        hasActions="selectedUser.id !== {{ auth()->id() }}"
-        >
+        hasActions="selectedUser.id !== {{ auth()->id() }}">
 
         <!-- User Profile Hero -->
         <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">

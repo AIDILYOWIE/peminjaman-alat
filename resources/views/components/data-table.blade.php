@@ -15,7 +15,15 @@
 'onRowClick' => null,
 'loading' => false,
 'exportRoute' => null,
+// New Extra Action Props
+'canExport' => 'false',
+'canImport' => 'false',
+'templateRoute' => '',
 ])
+
+@php
+$hasExtraActions = ($canExport === 'true' || $canImport === 'true' || $templateRoute);
+@endphp
 
 <div class="space-y-4">
     {{-- Header / Action Bar --}}
@@ -68,11 +76,41 @@
         @endif
 
         <div class="flex items-center justify-end gap-3 w-full sm:w-auto sm:ml-auto">
-            @if($hasExport)
-            <button @click="doExport()" class="inline-flex gap-[5px] items-center px-3 py-2 sm:px-4 sm:py-2.5 border border-transparent shadow-sm sm:text-sm text-[12px] font-medium sm:rounded-xl rounded-[10px] text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 hover:shadow-md active:scale-95">
-                <x-heroicon-o-arrow-down-tray class="sm:h-5 sm:w-5 h-4 w-4" />
-                Export
-            </button>
+            @if($hasExtraActions)
+            <div class="relative" x-data="{ extraOpen: false }">
+                <button @click="extraOpen = !extraOpen" @click.away="extraOpen = false" class="inline-flex items-center p-2 text-gray-500 bg-gray-100 rounded-lg active:scale-90 cursor-pointer" title="Lainnya">
+                    <x-heroicon-o-ellipsis-vertical class="sm:h-6 sm:w-6 h-5 w-5" />
+                </button>
+                <div x-show="extraOpen" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95">
+
+                    <template x-if="{{ $canExport }}">
+                        <button @click="extraOpen = false; doExport()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
+                            <x-heroicon-o-arrow-down-tray class="w-4 h-4 text-gray-400" />
+                            Export Data
+                        </button>
+                    </template>
+
+                    <template x-if="{{ $canImport }}">
+                        <button @click="extraOpen = false; $dispatch('open-import')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
+                            <x-heroicon-o-arrow-up-tray class="w-4 h-4 text-gray-400" />
+                            Import Data
+                        </button>
+                    </template>
+
+                    @if($templateRoute)
+                    <a href="{{ $templateRoute }}" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
+                        <x-heroicon-o-document-text class="w-4 h-4 text-gray-400" />
+                        Unduh Template
+                    </a>
+                    @endif
+                </div>
+            </div>
             @endif
 
             @if($hasFilter)

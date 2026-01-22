@@ -67,4 +67,35 @@ class CategoryController extends Controller
 
         return back()->with('error', $result);
     }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            Excel::import(new \App\Imports\KategoriImport, $request->file('file'));
+            return redirect()->route('admin.categories.index')
+                ->with('success', 'Data kategori berhasil diimpor.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $header = [['nama']];
+        return Excel::download(new class($header) implements \Maatwebsite\Excel\Concerns\FromCollection {
+            protected $data;
+            public function __construct($data)
+            {
+                $this->data = collect($data);
+            }
+            public function collection()
+            {
+                return $this->data;
+            }
+        }, 'template-import-kategori.xlsx');
+    }
 }

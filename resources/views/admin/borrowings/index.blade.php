@@ -148,7 +148,7 @@
         } else {
             this.form.live_fine = 0;
         }
-    },
+    }
 }">
     @php
     $columns = [
@@ -180,11 +180,12 @@
         paginated="true"
         searchPlaceholder="Cari peminjaman..."
         hasFilter="true"
-        hasExport="true"
-        :exportRoute="route('admin.borrowings.export')"
+        hasExport="false"
         onRowClick="openDetail($row)"
         addButtonText="Tambah"
-        :addButtonRoute="route('admin.borrowings.create')" />
+        :addButtonRoute="route('admin.borrowings.create')"
+        canExport="true"
+        :exportRoute="route('admin.borrowings.export')" />
 
     <x-slide-over
         open="detailOpen"

@@ -68,4 +68,35 @@ class ItemController extends Controller
         return redirect()->route('admin.items.index')
             ->with('success', 'Alat berhasil dihapus.');
     }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            Excel::import(new \App\Imports\AlatImport, $request->file('file'));
+            return redirect()->route('admin.items.index')
+                ->with('success', 'Data alat berhasil diimpor.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $header = [['nama', 'kategori', 'stok', 'keterangan']];
+        return Excel::download(new class($header) implements \Maatwebsite\Excel\Concerns\FromCollection {
+            protected $data;
+            public function __construct($data)
+            {
+                $this->data = collect($data);
+            }
+            public function collection()
+            {
+                return $this->data;
+            }
+        }, 'template-import-alat.xlsx');
+    }
 }
