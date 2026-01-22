@@ -98,6 +98,14 @@
                             required
                             description="Tentukan kapan alat harus dikembalikan." />
                     </div>
+
+                    <div class="col-span-1 md:col-span-2">
+                        <x-input.textarea
+                            label="Catatan / Keterangan"
+                            name="keterangan"
+                            placeholder="Contoh: Digunakan untuk praktik di lab..."
+                            description="Opsional: Tambahkan alasan atau detail penggunaan." />
+                    </div>
                 </div>
             </div>
 

@@ -27,6 +27,7 @@ class BorrowingRequest extends FormRequest
             'items' => 'required|array|min:1',
             'items.*.alat_id' => 'required|exists:alat,id',
             'items.*.jumlah' => 'required|integer|min:1',
+            'keterangan' => 'nullable|string',
         ];
     }
 }

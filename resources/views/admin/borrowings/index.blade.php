@@ -320,7 +320,7 @@
                                         <p class="text-sm font-medium text-gray-600 italic" x-text="form.note || '-'"></p>
                                     </template>
                                     <template x-if="isRescheduling || isEditing">
-                                        <textarea x-model="form.note" class="p-2 w-full text-xs border-gray-200 rounded-lg focus:outline-none border border-gray-200" rows="2"></textarea>
+                                        <textarea name="keterangan" x-model="form.note" class="p-2 w-full text-xs border-gray-200 rounded-lg focus:outline-none border border-gray-200" rows="2"></textarea>
                                     </template>
                                 </div>
                             </div>

@@ -74,6 +74,7 @@ class BorrowingService
                 'tgl_pengembalian' => $data['return_date'],
                 'status' => 'pending',
                 'tgl_pinjam' => null, // Filled on approval
+                'keterangan' => $data['keterangan'] ?? null,
             ]);
 
             // 2. Add details (multi-alat)
@@ -104,7 +105,14 @@ class BorrowingService
         return DB::transaction(function () use ($peminjaman, $data) {
             // Update main record
             if (isset($data['return_date'])) {
-                $peminjaman->update(['tgl_pengembalian' => $data['return_date']]);
+                $updateFields['tgl_pengembalian'] = $data['return_date'];
+            }
+            if (isset($data['keterangan'])) {
+                $updateFields['keterangan'] = $data['keterangan'];
+            }
+
+            if (!empty($updateFields)) {
+                $peminjaman->update($updateFields);
             }
 
             // Sync Details
