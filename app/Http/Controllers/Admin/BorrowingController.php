@@ -46,7 +46,7 @@ class BorrowingController extends Controller
                 'borrow_date' => $item->tgl_pinjam ? $item->tgl_pinjam->format('d M Y') : '-',
                 'return_date_raw' => $item->tgl_pengembalian->format('Y-m-d'),
                 'return_date_iso' => $item->tgl_pengembalian->format('Y-m-d\TH:i:s'),
-                'borrow_date_raw' => $item->tgl_pinjam->format('Y-m-d'),
+                'borrow_date_raw' => $item->tgl_pinjam ? $item->tgl_pinjam->format('Y-m-d') : null,
                 'fine' => $item->denda ?? 0,
                 'staff_name' => $item->petugas->username ?? '-',
                 'email' => $item->peminjam->email ?? '-',

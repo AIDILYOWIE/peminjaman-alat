@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 
-use function Symfony\Component\Clock\now;
+use Illuminate\Support\Carbon;
 
 class BorrowingService
 {
@@ -46,6 +46,14 @@ class BorrowingService
     }
 
     /**
+     * Get pending borrowings for staff approval.
+     */
+    public function getPaginatedPending(int $perPage = 10, ?string $search = null): LengthAwarePaginator
+    {
+        return $this->borrowingRepository->getPaginatedFiltered($perPage, $search, 'pending');
+    }
+
+    /**
      * Get borrowings for export.
      */
     public function exportBorrowings(?string $search = null): \Illuminate\Support\Collection
@@ -64,7 +72,7 @@ class BorrowingService
                 'user_id' => $data['user_id'],
                 'tgl_pengembalian' => $data['return_date'],
                 'status' => 'pending',
-                'tgl_pinjam' => now(), // Filled on approval
+                'tgl_pinjam' => null, // Filled on approval
             ]);
 
             // 2. Add details (multi-alat)
@@ -139,17 +147,34 @@ class BorrowingService
         return DB::transaction(function () use ($peminjaman, $status, $petugasId) {
             $updateData = ['status' => $status];
 
-            if ($status === 'dipinjam') {
+            if ($status === 'dipinjam' && $peminjaman->status !== 'dipinjam') {
                 $updateData['petugas_id'] = $petugasId ?? Auth::id();
                 $updateData['tgl_pinjam'] = now();
 
                 // Logic to deduct stock when actually borrowed
                 foreach ($peminjaman->details as $detail) {
                     $alat = $detail->alat;
-                    if ($alat->stock < $detail->jumlah) {
-                        throw new Exception("Stok alat {$alat->nama} tidak mencukupi untuk disetujui.");
+
+                    if (!$alat) {
+                        throw new Exception("Data alat untuk ID #{$detail->alat_id} tidak ditemukan.");
                     }
+
+                    if ($alat->stock < $detail->jumlah) {
+                        throw new Exception("Stok alat '{$alat->nama}' tidak mencukupi untuk disetujui (Sisa: {$alat->stock}, Diminta: {$detail->jumlah}).");
+                    }
+
+                    // Decrement stock in database
                     $alat->decrement('stock', $detail->jumlah);
+
+                    // Optional: Refresh local attribute if needed (though transaction will handle it)
+                    $alat->refresh();
+                }
+            }
+
+            if ($status === 'ditolak' && $peminjaman->status === 'dipinjam') {
+                // If it was already approved but now rejected, restore stock
+                foreach ($peminjaman->details as $detail) {
+                    $detail->alat->increment('stock', $detail->jumlah);
                 }
             }
 
@@ -196,5 +221,51 @@ class BorrowingService
             'tgl_pengembalian' => $data['tgl_pengembalian'],
             'keterangan' => $data['keterangan'] ?? $borrowing->keterangan,
         ]);
+    }
+
+    /**
+     * Process a return from staff with detailed per-item fines and notes.
+     */
+    public function processStaffReturn(Peminjaman $peminjaman, array $data, ?int $petugasId = null): bool
+    {
+        return DB::transaction(function () use ($peminjaman, $data, $petugasId) {
+            $petugasId = $petugasId ?? Auth::id();
+            $totalAdditionalFine = 0;
+
+            foreach ($data['details'] as $detailId => $detailData) {
+                $detail = $peminjaman->details()->find($detailId);
+                if ($detail) {
+                    $itemFine = $detailData['denda_final'] ?? 0;
+                    $detail->update([
+                        'denda_final' => $itemFine,
+                        'keterangan' => $detailData['keterangan'] ?? null,
+                    ]);
+                    $totalAdditionalFine += $itemFine;
+                }
+            }
+
+            // Calculate standard late fine
+            $lateFine = 0;
+            $deadline = $peminjaman->tgl_pengembalian->startOfDay();
+            $now = now()->startOfDay();
+            if ($now->greaterThan($deadline)) {
+                $diffDays = $now->diffInDays($deadline);
+                $lateFine = $diffDays * $peminjaman->getTotalTarifDenda();
+            }
+
+            // Final status update with combined fine
+            $updateData = [
+                'status' => 'selesai',
+                'petugas_id' => $petugasId,
+                'denda' => $lateFine + $totalAdditionalFine,
+            ];
+
+            // Restore stock
+            foreach ($peminjaman->details as $detail) {
+                $detail->alat->increment('stock', $detail->jumlah);
+            }
+
+            return $this->borrowingRepository->update($peminjaman, $updateData);
+        });
     }
 }

@@ -311,13 +311,11 @@
                         </div>
                     </template>
                     <template x-if="isEditing">
-                        <div class="w-full">
-                            <x-input.tool-list
-                                label="Edit Daftar Alat"
-                                :tools="$items->pluck('nama', 'id')"
-                                x-init="populate(form.details)"
-                                classItem="" />
-                        </div>
+                        <x-input.tool-list
+                            label="Edit Daftar Alat"
+                            :items="$items"
+                            x-init="populate(form.details)"
+                            classItem="" />
                     </template>
                 </div>
 

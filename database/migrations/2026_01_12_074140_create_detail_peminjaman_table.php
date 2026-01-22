@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreignId('peminjaman_id')->constrained('peminjaman')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('alat_id')->constrained('alat')->cascadeOnUpdate();
             $table->integer('jumlah');
-            $table->decimal('denda_final', 10, 2)->default(0);
-            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }

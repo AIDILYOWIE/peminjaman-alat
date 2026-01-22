@@ -105,7 +105,7 @@
             <div>
                 <x-input.tool-list
                     label="Daftar Alat yang Akan Dipinjam"
-                    :tools="$items->pluck('nama', 'id')" />
+                    :items="$items" />
             </div>
 
             {{-- Form Actions (Inside the card, border-t) --}}

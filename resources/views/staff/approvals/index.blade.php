@@ -23,6 +23,12 @@
         no_induk: '',
         duration: ''
     },
+    isLoading: true,
+    init() {
+        setTimeout(() => {
+            this.isLoading = false;
+        }, 1000);
+    },
     openDetail(borrowing) {
         this.selectedBorrowing = borrowing;
         this.form = { ...borrowing };
@@ -30,6 +36,42 @@
     },
     closeDetail() {
         this.detailOpen = false;
+    },
+    updateStatus(status) {
+        this.$dispatch('open-confirm', {
+            title: status === 'dipinjam' ? 'Setujui Peminjaman' : 'Tolak Peminjaman',
+            message: status === 'dipinjam' ? 'Apakah Anda yakin ingin menyetujui permintaan ini?' : 'Apakah Anda yakin ingin menolak permintaan ini?',
+            confirmText: status === 'dipinjam' ? 'Ya, Setujui' : 'Ya, Tolak',
+            onConfirm: () => {
+                this.submitStatus(status);
+            }
+        });
+    },
+    submitStatus(status) {
+        let form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/staff/approvals/${this.form.id}/status`;
+        
+        let csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = '{{ csrf_token() }}';
+        
+        let method = document.createElement('input');
+        method.type = 'hidden';
+        method.name = '_method';
+        method.value = 'PATCH';
+
+        let statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        
+        form.appendChild(csrf);
+        form.appendChild(method);
+        form.appendChild(statusInput);
+        document.body.appendChild(form);
+        form.submit();
     }
 }">
     <!-- Stats Overview -->
@@ -38,7 +80,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Menunggu Persetujuan</p>
-                    <h3 class="text-2xl font-bold text-gray-900 mt-1">5</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['pending'] }}</h3>
                 </div>
                 <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
                     <x-heroicon-o-clock class="w-6 h-6" />
@@ -49,7 +91,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Disetujui Hr Ini</p>
-                    <h3 class="text-2xl font-bold text-gray-900 mt-1">12</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['approved_today'] }}</h3>
                 </div>
                 <div class="p-3 bg-green-50 rounded-xl text-green-600">
                     <x-heroicon-o-check-circle class="w-6 h-6" />
@@ -60,7 +102,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Ditolak Hr Ini</p>
-                    <h3 class="text-2xl font-bold text-gray-900 mt-1">1</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['rejected_today'] }}</h3>
                 </div>
                 <div class="p-3 bg-red-50 rounded-xl text-red-600">
                     <x-heroicon-o-x-mark class="w-6 h-6" />
@@ -99,51 +141,6 @@
     ],
     ];
 
-    $borrowings = [
-    [
-    'id' => 1,
-    'name' => 'Arif Satrio',
-    'no_induk' => '2023010101',
-    'departemen' => 'RPL',
-    'tools_list' => 'Sony Alpha a7 III, Lensa 50mm',
-    'tools' => [
-    ['name' => 'Sony Alpha a7 III', 'qty' => 1],
-    ['name' => 'Lensa 50mm', 'qty' => 1],
-    ],
-    'qty' => 2,
-    'avatar' => 'heroicon-o-user',
-    'status' => 'pending',
-    'status_label' => 'Menunggu',
-    'status_color' => 'yellow',
-    'borrow_date' => '17 Jan 2026',
-    'return_date' => '19 Jan 2026',
-    'duration' => '2 Hari',
-    'email' => 'arif@gmail.com',
-    'note' => 'Untuk kebutuhan praktik studio',
-    'category' => 'Multimedia'
-    ],
-    [
-    'id' => 2,
-    'name' => 'Dewi Putri',
-    'no_induk' => '2023010102',
-    'departemen' => 'BC',
-    'tools_list' => 'Tripod Manfrotto',
-    'tools' => [
-    ['name' => 'Tripod Manfrotto', 'qty' => 1],
-    ],
-    'qty' => 1,
-    'avatar' => 'heroicon-o-user',
-    'status' => 'pending',
-    'status_label' => 'Menunggu',
-    'status_color' => 'yellow',
-    'borrow_date' => '17 Jan 2026',
-    'return_date' => '17 Jan 2026',
-    'duration' => '1 Hari',
-    'email' => 'dewi@gmail.com',
-    'note' => 'Praktik lapangan',
-    'category' => 'Multimedia'
-    ],
-    ];
     @endphp
 
     <x-data-table
@@ -151,7 +148,8 @@
         :rows="$borrowings"
         paginated="true"
         searchPlaceholder="Cari permintaan..."
-        hasFilter="true"
+        :hasFilter="false"
+        :hasExport="false"
         onRowClick="openDetail($row)" />
 
     <x-slide-over
@@ -181,10 +179,14 @@
             </div>
 
             <!-- Overview Stats: Fokus pada Persiapan Alat -->
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="cols-span-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
                     <div class="text-xs text-indigo-100 mb-1">Jumlah</div>
-                    <div class="sm:text-xl text-base font-bold" x-text="form.qty"></div>
+                    <div class="text-base font-bold" x-text="form.qty"></div>
+                </div>
+                <div class="cols-span-1 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                    <div class="text-xs text-indigo-100 mb-1">Durasi</div>
+                    <div class="text-base font-bold" x-text="form.duration"></div>
                 </div>
             </div>
         </div>
@@ -193,19 +195,21 @@
         <div class="sm:p-6 p-4 sm:space-y-6 space-y-4">
             <!-- Daftar Item Detail -->
             <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-list-bullet class="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-900">Daftar Item Detail</h4>
-                </div>
-                <div class="space-y-3">
-                    <template x-for="tool in form.tools" :key="tool.name">
-                        <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
-                            <span class="text-sm font-medium text-gray-700" x-text="tool.name"></span>
-                            <span class="text-xs font-bold px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100" x-text="tool.qty + ' Unit'"></span>
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                            <x-heroicon-o-cube class="w-5 h-5 text-indigo-600" />
                         </div>
-                    </template>
+                        <h4 class="text-sm font-bold text-gray-900">Alat yang Dipinjam</h4>
+                    </div>
+                    <div class="space-y-3">
+                        <template x-for="tool in form.tools" :key="tool.name">
+                            <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
+                                <span class="text-sm font-medium text-gray-700" x-text="tool.name"></span>
+                                <span class="text-xs font-semibold bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 text-indigo-600" x-text="tool.qty + ' Unit'"></span>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
 
@@ -242,39 +246,41 @@
                 </div>
             </div>
 
-
-            <!-- Timeline Card -->
+            <!-- Timeline Section -->
             <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                        <x-heroicon-o-calendar class="w-5 h-5 text-amber-600" />
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <x-heroicon-o-clock class="w-5 h-5 text-amber-600" />
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-900">Waktu & Transaksi</h4>
                     </div>
-                    <h4 class="text-sm font-bold text-gray-900">Jadwal Penggunaan</h4>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-3 bg-white rounded-xl border border-gray-100">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Ambil Barang</p>
-                        <p class="text-sm font-medium text-gray-900" x-text="form.borrow_date"></p>
-                    </div>
-                    <div class="p-3 bg-white rounded-xl border border-gray-100">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Batas Kembali</p>
-                        <p class="text-sm font-medium text-indigo-600" x-text="form.return_date"></p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Note Card -->
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <label class="block text-xs font-bold text-gray-900 uppercase tracking-wider mb-2">Keperluan / Catatan</label>
-                <div class="text-sm text-gray-700 bg-gray-50 py-4 rounded-xl italic leading-relaxed" x-text="'&quot;' + form.note + '&quot;'"></div>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <x-input.date ::disabled="true" name="return_date" label="Batas Kembali" ::required="false" x-model="form.return_date" />
+                            </div>
+                            <div>
+                                <x-input.date ::disabled="true" name="borrow_date" label="Waktu Pinjam" ::required="false" x-model="form.borrow_date" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">Catatan/Keperluan</label>
+                                <p class="text-sm font-medium text-gray-600 italic" x-text="form.note || '-'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="grid grid-cols-2 gap-4 pt-2">
-                <button @click="closeDetail()" class="px-4 py-3.5 bg-white border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2 active:scale-95">
+                <button @click="updateStatus('ditolak')" class="cursor-pointer px-4 py-3.5 bg-white border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2 active:scale-95">
                     <x-heroicon-o-x-circle class="w-4 h-4" /> Tolak
                 </button>
-                <button @click="closeDetail()" class="px-4 py-3.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95">
+                <button @click="updateStatus('dipinjam')" class="cursor-pointer px-4 py-3.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95">
                     <x-heroicon-o-check-badge class="w-4 h-4" /> Setujui
                 </button>
             </div>

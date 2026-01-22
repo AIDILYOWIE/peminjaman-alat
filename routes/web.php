@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BorrowingController;
 use App\Http\Controllers\Admin\ReturnController;
+use App\Http\Controllers\Staff\ApprovalController;
+use App\Http\Controllers\Staff\ReturnController as StaffReturnController;
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -91,12 +93,14 @@ Route::middleware('auth')->group(function () {
 
     // Staff Routes (Approvals & Returns)
     Route::prefix('staff')->name('staff.')->middleware('role:petugas')->group(function () {
-        Route::get('/approvals', function () {
-            return view('staff.approvals.index');
-        })->name('approvals.index');
+        Route::prefix('/approvals')->name('approvals.')->group(function () {
+            Route::get('/', [ApprovalController::class, 'index'])->name('index');
+            Route::patch('/{borrowing}/status', [ApprovalController::class, 'updateStatus'])->name('update-status');
+        });
 
-        Route::get('/returns', function () {
-            return view('staff.returns.index');
-        })->name('returns.index');
+        Route::prefix('/returns')->name('returns.')->group(function () {
+            Route::get('/', [StaffReturnController::class, 'index'])->name('index');
+            Route::patch('/{borrowing}/approve', [StaffReturnController::class, 'approve'])->name('approve');
+        });
     });
 });

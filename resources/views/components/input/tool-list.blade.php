@@ -1,13 +1,37 @@
 @props([
 'label' => 'List Alat',
-'tools' => [], // Array of tool options [id => name]
+'items' => collect(), // Actual Tool objects with stock
+'tools' => null, // Fallback for older usage
 'name' => 'items',
 'value' => null
 ])
 
+@php
+// If tools is passed instead of items (backward compatibility)
+if ($tools && $items->isEmpty()) {
+$items = collect($tools)->map(fn($name, $id) => (object)['id' => $id, 'nama' => $name, 'stock' => 999]);
+}
+@endphp
+
 <div {{ $attributes->merge(['class' => 'space-y-4']) }}
     x-data="{
         rows: @js($value ?? [['alat_id' => '', 'jumlah' => 1]]),
+        tools: @js(collect($items)->mapWithKeys(fn($item) => [$item->id => ['name' => $item->nama, 'stock' => $item->stock ?? 999]])),
+        
+        getMaxStock(id) {
+            return this.tools[id] ? this.tools[id].stock : 999;
+        },
+
+        validateQty(row) {
+            let max = this.getMaxStock(row.alat_id);
+            if (row.jumlah > max) {
+                row.jumlah = max;
+            }
+            if (row.jumlah < 1) {
+                row.jumlah = 1;
+            }
+        },
+
         populate(data) {
             if (data && Array.isArray(data) && data.length > 0) {
                 this.rows = data.map(item => ({
@@ -49,12 +73,13 @@
                             :id="'alat_' + index"
                             :name="'{{ $name }}[' + index + '][alat_id]'"
                             x-model="row.alat_id"
+                            @change="validateQty(row)"
                             required
                             class="block w-full  border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-gray-50 border">
                             <option value="" disabled selected>Pilih Alat...</option>
-                            @foreach($tools as $id => $toolName)
-                            <option value="{{ (string)$id }}">{{ $toolName }}</option>
-                            @endforeach
+                            <template x-for="(tool, id) in tools" :key="id">
+                                <option :value="id" x-text="tool.name + ' (Stok: ' + tool.stock + ')'"></option>
+                            </template>
                         </select>
                     </div>
                 </div>
@@ -74,13 +99,16 @@
                             type="number"
                             :name="'{{ $name }}[' + index + '][jumlah]'"
                             x-model.number="row.jumlah"
+                            @input="validateQty(row)"
                             min="1"
+                            :max="getMaxStock(row.alat_id)"
                             required
                             class="block w-full text-center border-gray-200 rounded-lg text-sm font-semibold focus:ring-indigo-500 focus:border-indigo-500 py-2.5 bg-white border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                         <button
                             type="button"
                             @click="row.jumlah++"
-                            class="cursor-pointer p-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                            :disabled="row.alat_id && row.jumlah >= getMaxStock(row.alat_id)"
+                            class="cursor-pointer p-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-30 disabled:cursor-not-allowed">
                             <x-heroicon-s-plus class="w-4 h-4 text-gray-500" />
                         </button>
                     </div>
