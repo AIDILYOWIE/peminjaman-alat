@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\CategoryRequest;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\KategoriImport;
 
 class CategoryController extends Controller
 {
@@ -71,13 +72,28 @@ class CategoryController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+            'file' => 'required'
         ]);
 
         try {
-            Excel::import(new \App\Imports\KategoriImport, $request->file('file'));
+            $import = new KategoriImport;
+            Excel::import($import, $request->file('file'));
+
+            $msg = "Data kategori berhasil diimpor. ({$import->newCount} baru ditambahkan";
+            if ($import->skippedCount > 0) {
+                $msg .= ", {$import->skippedCount} data sudah ada dilewati";
+            }
+            $msg .= ").";
+
             return redirect()->route('admin.categories.index')
-                ->with('success', 'Data kategori berhasil diimpor.');
+                ->with('success', $msg);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMsg = 'Import selesai dengan beberapa peringatan: ';
+            foreach ($failures as $failure) {
+                $errorMsg .= "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . ". ";
+            }
+            return back()->with('error', $errorMsg);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
         }

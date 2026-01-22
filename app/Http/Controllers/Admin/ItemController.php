@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\ItemRequest;
 use App\Services\ItemService;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\AlatImport;
 
 class ItemController extends Controller
 {
@@ -72,13 +73,28 @@ class ItemController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+            'file' => 'required'
         ]);
 
         try {
-            Excel::import(new \App\Imports\AlatImport, $request->file('file'));
+            $import = new AlatImport;
+            Excel::import($import, $request->file('file'));
+
+            $msg = "Data alat berhasil diimpor. ({$import->newCount} baru ditambahkan";
+            if ($import->skippedCount > 0) {
+                $msg .= ", {$import->skippedCount} data sudah ada dilewati";
+            }
+            $msg .= ").";
+
             return redirect()->route('admin.items.index')
-                ->with('success', 'Data alat berhasil diimpor.');
+                ->with('success', $msg);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMsg = 'Import selesai dengan beberapa peringatan: ';
+            foreach ($failures as $failure) {
+                $errorMsg .= "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . ". ";
+            }
+            return back()->with('error', $errorMsg);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
         }

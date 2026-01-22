@@ -10,22 +10,33 @@ use Illuminate\Support\Str;
 
 class KategoriImport implements ToModel, WithHeadingRow, WithValidation
 {
+    public $newCount = 0;
+    public $skippedCount = 0;
+
     public function model(array $row)
     {
-        // Case-insensitive check for duplicates
-        if (Kategori::where('nama', $row['nama'])->exists()) {
+        $nama = isset($row['nama']) ? trim((string)$row['nama']) : null;
+
+        if (empty($nama)) {
             return null;
         }
 
+        // Case-insensitive check for duplicates (PostgreSQL friendly)
+        if (Kategori::whereRaw('LOWER(nama) = ?', [strtolower($nama)])->exists()) {
+            $this->skippedCount++;
+            return null;
+        }
+
+        $this->newCount++;
         return new Kategori([
-            'nama' => $row['nama'],
+            'nama' => $nama,
         ]);
     }
 
     public function rules(): array
     {
         return [
-            'nama' => 'required|string|max:255',
+            'nama' => 'nullable|string|max:255',
         ];
     }
 }

@@ -78,10 +78,12 @@ $hasExtraActions = ($canExport === 'true' || $canImport === 'true' || $templateR
         <div class="flex items-center justify-end gap-3 w-full sm:w-auto sm:ml-auto">
             @if($hasExtraActions)
             <div class="relative" x-data="{ extraOpen: false }">
-                <button @click="extraOpen = !extraOpen" @click.away="extraOpen = false" class="inline-flex items-center p-2 text-gray-500 bg-gray-100 rounded-lg active:scale-90 cursor-pointer" title="Lainnya">
+                <button @click.stop="extraOpen = !extraOpen" class="inline-flex items-center p-2 text-gray-500 bg-gray-100 rounded-lg active:scale-90 cursor-pointer" title="Lainnya">
                     <x-heroicon-o-ellipsis-vertical class="sm:h-6 sm:w-6 h-5 w-5" />
                 </button>
-                <div x-show="extraOpen" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden"
+                <div x-show="extraOpen" x-cloak
+                    @click.away="extraOpen = false"
+                    class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95"
                     x-transition:enter-end="opacity-100 scale-100"
@@ -90,21 +92,21 @@ $hasExtraActions = ($canExport === 'true' || $canImport === 'true' || $templateR
                     x-transition:leave-end="opacity-0 scale-95">
 
                     <template x-if="{{ $canExport }}">
-                        <button @click="extraOpen = false; doExport()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
+                        <button @click.stop="doExport(); extraOpen = false" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
                             <x-heroicon-o-arrow-down-tray class="w-4 h-4 text-gray-400" />
                             Export Data
                         </button>
                     </template>
 
                     <template x-if="{{ $canImport }}">
-                        <button @click="extraOpen = false; $dispatch('open-import')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
+                        <button @click.stop="$dispatch('trigger-import-modal'); extraOpen = false" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
                             <x-heroicon-o-arrow-up-tray class="w-4 h-4 text-gray-400" />
                             Import Data
                         </button>
                     </template>
 
                     @if($templateRoute)
-                    <a href="{{ $templateRoute }}" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
+                    <a href="{{ $templateRoute }}" @click="extraOpen = false" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors">
                         <x-heroicon-o-document-text class="w-4 h-4 text-gray-400" />
                         Unduh Template
                     </a>

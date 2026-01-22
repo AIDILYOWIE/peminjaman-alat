@@ -48,7 +48,7 @@
 
         <div class="flex-1 min-w-0">
             <p class="text-sm font-bold text-gray-900" x-text="type.charAt(0).toUpperCase() + type.slice(1)"></p>
-            <p class="text-xs text-gray-500 truncate" x-text="message"></p>
+            <p class="text-xs text-gray-500 leading-relaxed" x-text="message"></p>
         </div>
 
         <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-gray-500 transition-colors">
