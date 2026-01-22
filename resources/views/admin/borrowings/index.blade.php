@@ -50,6 +50,14 @@
     openDetail(borrowing) {
         this.selectedBorrowing = JSON.parse(JSON.stringify(borrowing));
         this.form = JSON.parse(JSON.stringify(borrowing));
+        // Ensure details is an array and IDs are strings
+        if (this.form.details) {
+            const list = Array.isArray(this.form.details) ? this.form.details : Object.values(this.form.details);
+            this.form.details = list.map(d => ({
+                ...d,
+                alat_id: d.alat_id ? d.alat_id.toString() : ''
+            }));
+        }
         this.detailOpen = true;
         this.isEditing = false;
         this.isRescheduling = false;
@@ -272,7 +280,7 @@
                                 <h4 class="text-sm font-bold text-gray-900">Alat yang Dipinjam</h4>
                             </div>
                             <div class="space-y-3">
-                                <template x-for="tool in form.details" :key="tool.name">
+                                <template x-for="tool in form.details" :key="tool.alat_id || tool.name">
                                     <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
                                         <span class="text-sm font-medium text-gray-700" x-text="tool.name"></span>
                                         <span class="text-xs font-semibold bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 text-indigo-600" x-text="tool.jumlah + ' Unit'"></span>
@@ -320,7 +328,7 @@
                                         <p class="text-sm font-medium text-gray-600 italic" x-text="form.note || '-'"></p>
                                     </template>
                                     <template x-if="isRescheduling || isEditing">
-                                        <textarea name="keterangan" x-model="form.note" class="p-2 w-full text-xs border-gray-200 rounded-lg focus:outline-none border border-gray-200" rows="2"></textarea>
+                                        <textarea x-model="form.note" class="p-2 w-full text-xs border-gray-200 rounded-lg focus:outline-none border border-gray-200" rows="2"></textarea>
                                     </template>
                                 </div>
                             </div>

@@ -15,11 +15,12 @@ $items = collect($tools)->map(fn($name, $id) => (object)['id' => $id, 'nama' => 
 
 <div {{ $attributes->merge(['class' => 'space-y-4']) }}
     x-data="{
-        rows: @js($value ?? [['alat_id' => '', 'jumlah' => 1]]),
-        tools: @js(collect($items)->mapWithKeys(fn($item) => [$item->id => ['name' => $item->nama, 'stock' => $item->stock ?? 999]])),
+        rows: @js($value ?? []),
+        tools: @js($items->map(fn($item) => ['id' => $item->id, 'name' => $item->nama, 'stock' => $item->stock ?? 0])->values()->all()),
         
         getMaxStock(id) {
-            return this.tools[id] ? this.tools[id].stock : 999;
+            let tool = this.tools.find(t => t.id.toString() === id.toString());
+            return tool ? tool.stock : 999;
         },
 
         validateQty(row) {
@@ -33,15 +34,24 @@ $items = collect($tools)->map(fn($name, $id) => (object)['id' => $id, 'nama' => 
         },
 
         populate(data) {
-            if (data && Array.isArray(data) && data.length > 0) {
-                this.rows = data.map(item => ({
+            this.$nextTick(() => {
+                const list = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+                this.rows = list.map(item => ({
+                    uid: Math.random().toString(36).substr(2, 9),
                     alat_id: item.alat_id ? item.alat_id.toString() : '',
                     jumlah: item.jumlah || 1
                 }));
-            }
+                if (this.rows.length === 0) {
+                    this.addRow();
+                }
+            });
         },
         addRow() {
-            this.rows.push({ alat_id: '', jumlah: 1 });
+            this.rows.push({ 
+                uid: Math.random().toString(36).substr(2, 9),
+                alat_id: '', 
+                jumlah: 1 
+            });
         },
         removeRow(index) {
             if (this.rows.length > 1) {
@@ -62,8 +72,8 @@ $items = collect($tools)->map(fn($name, $id) => (object)['id' => $id, 'nama' => 
         </button>
     </div>
 
-    <div class="space-y-4">
-        <template x-for="(row, index) in rows" :key="index">
+    <div class="space-y-4" x-init="if(rows.length === 0) addRow()">
+        <template x-for="(row, index) in rows" :key="row.uid">
             <div class="grid grid-cols-1 gap-3 items-start bg-gray-50/50 p-4 rounded-xl border border-gray-100 relative group">
                 {{-- Tool Selection --}}
                 <div class="col-span-1 md:col-span-8">
@@ -76,10 +86,10 @@ $items = collect($tools)->map(fn($name, $id) => (object)['id' => $id, 'nama' => 
                             @change="validateQty(row)"
                             required
                             class="block w-full  border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2.5 bg-gray-50 border">
-                            <option value="" disabled selected>Pilih Alat...</option>
-                            <template x-for="(tool, id) in tools" :key="id">
-                                <option :value="id" x-text="tool.name + ' (Stok: ' + tool.stock + ')'"></option>
-                            </template>
+                            <option value="" disabled>Pilih Alat...</option>
+                            @foreach($items as $item)
+                            <option value="{{ $item->id }}">{{ $item->nama }} (Stok: {{ $item->stock }})</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

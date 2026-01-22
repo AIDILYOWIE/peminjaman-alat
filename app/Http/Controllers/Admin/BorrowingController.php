@@ -53,11 +53,11 @@ class BorrowingController extends Controller
                 'note' => $item->keterangan ?? '-',
                 'category' => $item->details->first()?->alat->kategori->nama ?? '-',
                 'details' => $item->details->map(fn($d) => [
-                    'alat_id' => $d->alat_id,
+                    'alat_id' => (string) $d->alat_id,
                     'name' => $d->alat->nama,
                     'jumlah' => $d->jumlah,
                     'category' => $d->alat->kategori->nama ?? '-'
-                ])
+                ])->values()->all()
             ];
         });
 
