@@ -25,6 +25,11 @@ class User extends Authenticatable
         return $this->role === 'peminjam';
     }
 
+    public function peminjaman()
+    {
+        return $this->hasMany(Peminjaman::class, 'user_id');
+    }
+
     protected $fillable = [
         'username',
         'password',

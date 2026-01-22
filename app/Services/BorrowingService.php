@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Exception;
+use App\Services\LogService;
 
 use Illuminate\Support\Carbon;
 
@@ -90,6 +91,7 @@ class BorrowingService
                 ]);
             }
 
+            LogService::log('CREATE', "Mengajukan peminjaman baru untuk: {$borrowing->peminjam->username}");
             return $borrowing;
         });
     }
@@ -135,6 +137,7 @@ class BorrowingService
                 }
             }
 
+            LogService::log('UPDATE', "Memperbarui data peminjaman ID #{$peminjaman->id}");
             return true;
         });
     }
@@ -195,7 +198,11 @@ class BorrowingService
                 }
             }
 
-            return $this->borrowingRepository->update($peminjaman, $updateData);
+            $updated = $this->borrowingRepository->update($peminjaman, $updateData);
+            if ($updated) {
+                LogService::log('UPDATE', "Mengubah status peminjaman ID #{$peminjaman->id} menjadi " . strtoupper($status));
+            }
+            return $updated;
         });
     }
 
@@ -211,16 +218,25 @@ class BorrowingService
                     $detail->alat->increment('stock', $detail->jumlah);
                 }
             }
-            return $this->borrowingRepository->delete($peminjaman);
+            $borrowingId = $peminjaman->id;
+            $deleted = $this->borrowingRepository->delete($peminjaman);
+            if ($deleted) {
+                LogService::log('DELETE', "Menghapus data peminjaman ID #{$borrowingId}");
+            }
+            return $deleted;
         });
     }
 
     public function rescheduleBorrowing(Peminjaman $borrowing, array $data): bool
     {
-        return $this->borrowingRepository->update($borrowing, [
+        $updated = $this->borrowingRepository->update($borrowing, [
             'tgl_pengembalian' => $data['tgl_pengembalian'],
             'keterangan' => $data['keterangan'] ?? $borrowing->keterangan,
         ]);
+        if ($updated) {
+            LogService::log('UPDATE', "Melakukan reschedule peminjaman ID #{$borrowing->id} ke tanggal {$data['tgl_pengembalian']}");
+        }
+        return $updated;
     }
 
     /**
@@ -265,7 +281,11 @@ class BorrowingService
                 $detail->alat->increment('stock', $detail->jumlah);
             }
 
-            return $this->borrowingRepository->update($peminjaman, $updateData);
+            $updated = $this->borrowingRepository->update($peminjaman, $updateData);
+            if ($updated) {
+                LogService::log('UPDATE', "Memproses pengembalian alat untuk peminjaman ID #{$peminjaman->id}");
+            }
+            return $updated;
         });
     }
 }

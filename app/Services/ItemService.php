@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Services\LogService;
 
 class ItemService
 {
@@ -61,6 +62,7 @@ class ItemService
             }
 
             $this->clearCache();
+            LogService::log('CREATE', "Menambahkan alat baru: {$item->nama} ({$item->code})");
             return $item;
         });
     }
@@ -89,6 +91,7 @@ class ItemService
         $updated = $this->itemRepository->update($item, $data);
         if ($updated) {
             $this->clearCache();
+            LogService::log('UPDATE', "Memperbarui data alat: {$item->nama} ({$item->code})");
         }
         return $updated;
     }
@@ -104,9 +107,12 @@ class ItemService
         // Delete the entire folder for this item
         Storage::disk('public')->deleteDirectory("items/{$item->id}");
 
+        $itemName = $item->nama;
+        $itemCode = $item->code;
         $deleted = $this->itemRepository->delete($item);
         if ($deleted) {
             $this->clearCache();
+            LogService::log('DELETE', "Menghapus alat: {$itemName} ({$itemCode})");
         }
         return $deleted;
     }

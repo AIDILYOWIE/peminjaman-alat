@@ -10,7 +10,11 @@ class UserRepository
 {
     public function getAllPaginated(int $perPage = 10, ?string $search = null): LengthAwarePaginator
     {
-        $query = User::query()->latest();
+        $query = User::query()
+            ->withCount(['peminjaman as active_peminjaman_count' => function ($q) {
+                $q->whereIn('status', ['pending', 'dipinjam']);
+            }])
+            ->latest();
 
         if ($search) {
             $query->where(function ($q) use ($search) {

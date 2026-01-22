@@ -45,23 +45,34 @@ class UserController extends Controller
 
     public function update(UserRequest $request, User $user)
     {
-        $updated = $this->userService->updateUser($user, $request->validated());
+        try {
+            $updated = $this->userService->updateUser($user, $request->validated());
 
-        if (!$updated) {
+            if (!$updated) {
+                return redirect()->back()
+                    ->with('error', 'Gagal memperbarui data pengguna.')
+                    ->withInput();
+            }
+
+            return redirect()->route('admin.users.index')
+                ->with('success', 'Data pengguna berhasil diperbarui.');
+        } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal memperbarui data pengguna.')
+                ->with('error', $e->getMessage())
                 ->withInput();
         }
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Data pengguna berhasil diperbarui.');
     }
 
     public function destroy(User $user)
     {
-        $this->userService->deleteUser($user);
+        try {
+            $this->userService->deleteUser($user);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Pengguna berhasil dihapus.');
+            return redirect()->route('admin.users.index')
+                ->with('success', 'Pengguna berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
     }
 }

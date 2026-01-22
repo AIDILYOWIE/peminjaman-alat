@@ -6,6 +6,7 @@ use App\Repositories\CategoryRepository;
 use App\Models\Kategori;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use App\Services\LogService;
 
 class CategoryService
 {
@@ -43,6 +44,9 @@ class CategoryService
     {
         $category = $this->categoryRepository->create($data);
         $this->clearCache();
+
+        LogService::log('CREATE', "Menambahkan kategori baru: {$category->nama}");
+
         return $category;
     }
 
@@ -55,9 +59,11 @@ class CategoryService
      */
     public function updateCategory(Kategori $category, array $data): bool
     {
+        $oldName = $category->nama;
         $updated = $this->categoryRepository->update($category, $data);
         if ($updated) {
             $this->clearCache();
+            LogService::log('UPDATE', "Memperbarui kategori dari '{$oldName}' menjadi '{$category->nama}'");
         }
         return $updated;
     }
@@ -74,9 +80,11 @@ class CategoryService
             return 'Kategori tidak dapat dihapus karena masih memiliki alat terkait.';
         }
 
+        $categoryName = $category->nama;
         $deleted = $this->categoryRepository->delete($category);
         if ($deleted) {
             $this->clearCache();
+            LogService::log('DELETE', "Menghapus kategori: {$categoryName}");
         }
         return true;
     }

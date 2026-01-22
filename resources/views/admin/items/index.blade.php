@@ -123,7 +123,7 @@
     'label' => 'Kategori',
     'key' => 'kategori.nama',
     'component' => 'badge',
-    'params' => ['color' => 'indigo'],
+    'params' => ['color' => 'random'],
     'hidden' => 'hidden sm:table-cell',
     'align' => 'text-center',
     'class' => 'whitespace-nowrap w-px'

@@ -46,6 +46,14 @@
         this.$refs.editForm.submit();
     },
     confirmDelete() {
+        if (this.selectedUser.active_peminjaman_count > 0) {
+            this.$dispatch('open-toast', {
+                type: 'error',
+                message: 'Pengguna tidak dapat dihapus karena memiliki peminjaman aktif/pending.'
+            });
+            return;
+        }
+
         this.$dispatch('open-confirm', {
             title: 'Hapus Pengguna',
             message: 'Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.',
@@ -109,7 +117,9 @@
         onToggleEdit="toggleEdit()"
         onConfirm="confirmEdit()"
         onCancel="cancelEdit()"
-        onDelete="confirmDelete()">
+        onDelete="confirmDelete()"
+        hasActions="selectedUser.id !== {{ auth()->id() }}"
+        >
 
         <!-- User Profile Hero -->
         <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">
