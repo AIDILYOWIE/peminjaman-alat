@@ -251,7 +251,7 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-gray-500 mb-2">Kode Alat</label>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">SKU</label>
                                 <input type="text" name="code" x-model="form.code" :readonly="true"
                                     class="w-full py-2.5 bg-gray-50 rounded-xl text-sm font-medium text-gray-900 focus:outline-none transition-all @error('code') border-red-500 @enderror">
                                 @error('code') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
@@ -270,7 +270,7 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-gray-500 mb-2">Stok</label>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">Total Stok</label>
                                 <input type="number" name="stock" x-model="form.stock" :disabled="!isEditing"
                                     class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-transparent disabled:border-transparent disabled:px-0 @error('stock') border-red-500 @enderror">
                                 @error('stock') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
@@ -300,6 +300,42 @@
                             @error('deskripsi') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
                         </div>
 
+                    </div>
+                </div>
+
+                <!-- Unit List Section (Asset Tracking) -->
+                <div class="mt-6 bg-gray-50 rounded-2xl p-5 border border-gray-100" x-show="!isEditing && form.units && form.units.length > 0">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                                <x-heroicon-o-identification class="w-5 h-5 text-gray-400" />
+                            </div>
+                            <h4 class="text-sm font-bold text-gray-900">Daftar Unit (Asset Tracking)</h4>
+                        </div>
+                        <span class="text-[10px] font-semibold px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full" x-text="form.units.length + ' Unit'"></span>
+                    </div>
+
+                    <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <template x-for="unit in form.units" :key="unit.id">
+                            <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:border-indigo-200 transition-colors group">
+                                <div class="flex items-center gap-3">
+                                    <div>
+                                        <div class="text-xs font-bold text-gray-900" x-text="unit.unit_code"></div>
+                                        <div class="text-[10px] text-gray-500" x-text="'Kondisi: ' + (unit.condition || 'Baik')"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                                        :class="{
+                                            'bg-green-100 text-green-600': unit.status === 'ready',
+                                            'bg-blue-100 text-blue-600': unit.status === 'borrowed',
+                                            'bg-red-100 text-red-600': unit.status === 'damaged' || unit.status === 'lost',
+                                            'bg-yellow-100 text-yellow-600': unit.status === 'maintenance'
+                                        }"
+                                        x-text="unit.status.charAt(0).toUpperCase() + unit.status.slice(1)"></span>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </form>

@@ -35,7 +35,7 @@ class BorrowingController extends Controller
                 'name' => $item->peminjam->username,
                 'no_induk' => $item->peminjam->no_induk,
                 'role' => $item->peminjam->role,
-                'tools' => $item->details->map(fn($d) => $d->alat->nama . " ({$d->jumlah})")->implode(', '),
+                'tools' => $item->details->map(fn($d) => $d->unit ? $d->unit->unit_code : $d->alat->nama)->implode(', '),
                 'qty' => $item->details->sum('jumlah'),
                 'status' => $item->status,
                 'status_label' => $statusData['label'],
@@ -55,6 +55,7 @@ class BorrowingController extends Controller
                 'details' => $item->details->map(fn($d) => [
                     'alat_id' => (string) $d->alat_id,
                     'name' => $d->alat->nama,
+                    'unit_code' => $d->unit->unit_code ?? null,
                     'jumlah' => $d->jumlah,
                     'category' => $d->alat->kategori->nama ?? '-'
                 ])->values()->all()

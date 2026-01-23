@@ -30,4 +30,9 @@ class Alat extends Model
     {
         return $this->belongsTo(Kategori::class);
     }
+
+    public function units()
+    {
+        return $this->hasMany(AlatUnit::class);
+    }
 }

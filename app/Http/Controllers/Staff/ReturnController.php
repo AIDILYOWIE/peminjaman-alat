@@ -32,10 +32,11 @@ class ReturnController extends Controller
                 'name' => $item->peminjam->username,
                 'no_induk' => $item->peminjam->no_induk,
                 'departemen' => 'Informasi Umum', // Placeholder
-                'tools_list' => $item->details->map(fn($d) => $d->alat->nama . " ({$d->jumlah})")->implode(', '),
+                'tools_list' => $item->details->map(fn($d) => $d->unit ? $d->unit->unit_code : $d->alat->nama)->implode(', '),
                 'tools' => $item->details->map(fn($d) => [
                     'id' => $d->id,
                     'name' => $d->alat->nama,
+                    'unit_code' => $d->unit->unit_code ?? null,
                     'qty' => $d->jumlah,
                     'fine_rate' => $d->alat->denda, // Current fine rate per item
                     'denda_final' => 0,

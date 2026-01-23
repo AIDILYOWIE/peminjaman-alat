@@ -86,10 +86,13 @@ class BorrowingService
                     throw new Exception("Stok alat {$alat->nama} tidak mencukupi.");
                 }
 
-                $borrowing->details()->create([
-                    'alat_id' => $item['alat_id'],
-                    'jumlah' => $item['jumlah'],
-                ]);
+                // Create individual detail records for each unit (Asset Tracking)
+                for ($i = 0; $i < $item['jumlah']; $i++) {
+                    $borrowing->details()->create([
+                        'alat_id' => $item['alat_id'],
+                        'jumlah'  => 1, // Fixed to 1 for individual tracking
+                    ]);
+                }
             }
 
             LogService::log('CREATE', "Mengajukan peminjaman baru untuk: {$borrowing->peminjam->username}");
@@ -170,14 +173,19 @@ class BorrowingService
                         throw new Exception("Data alat untuk ID #{$detail->alat_id} tidak ditemukan.");
                     }
 
-                    if ($alat->stock < $detail->jumlah) {
-                        throw new Exception("Stok alat '{$alat->nama}' tidak mencukupi untuk disetujui (Sisa: {$alat->stock}, Diminta: {$detail->jumlah}).");
+                    // Find an available unit for this specific tool
+                    $unit = $alat->units()->where('status', 'ready')->lockForUpdate()->first();
+
+                    if (!$unit) {
+                        throw new Exception("Unit '{$alat->nama}' yang tersedia tidak mencukupi untuk disetujui (Kehabisan unit fisik).");
                     }
 
-                    // Decrement stock in database
-                    $alat->decrement('stock', $detail->jumlah);
+                    // Assign unit and change its status
+                    $detail->update(['alat_unit_id' => $unit->id]);
+                    $unit->update(['status' => 'borrowed']);
 
-                    // Optional: Refresh local attribute if needed (though transaction will handle it)
+                    // Decrement stock in database (aggregate)
+                    $alat->decrement('stock', 1);
                     $alat->refresh();
                 }
             }
@@ -192,7 +200,12 @@ class BorrowingService
             if ($status === 'selesai') {
                 // Logic to restore stock when returned
                 foreach ($peminjaman->details as $detail) {
-                    $detail->alat->increment('stock', $detail->jumlah);
+                    // Release physical unit
+                    if ($detail->alat_unit_id && $detail->unit) {
+                        $detail->unit->update(['status' => 'ready']);
+                    }
+
+                    $detail->alat->increment('stock', 1);
                 }
 
                 // Final fine snapshot
@@ -286,7 +299,12 @@ class BorrowingService
 
             // Restore stock
             foreach ($peminjaman->details as $detail) {
-                $detail->alat->increment('stock', $detail->jumlah);
+                // Release physical unit
+                if ($detail->alat_unit_id && $detail->unit) {
+                    $detail->unit->update(['status' => 'ready']);
+                }
+
+                $detail->alat->increment('stock', 1);
             }
 
             $updated = $this->borrowingRepository->update($peminjaman, $updateData);

@@ -18,7 +18,7 @@ class ItemRepository
      */
     public function getAllPaginated(int $perPage = 10, ?string $search = null, ?int $categoryId = null): LengthAwarePaginator
     {
-        $query = Alat::with('kategori')->latest();
+        $query = Alat::with(['kategori', 'units'])->latest();
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -36,7 +36,7 @@ class ItemRepository
 
     public function getAllFiltered(?string $search = null): \Illuminate\Support\Collection
     {
-        $query = Alat::with('kategori')->latest();
+        $query = Alat::with(['kategori', 'units'])->latest();
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -55,7 +55,7 @@ class ItemRepository
      */
     public function getAllWithKategori(): Collection
     {
-        return Alat::with('kategori')->latest()->get();
+        return Alat::with(['kategori', 'units'])->latest()->get();
     }
 
     /**
@@ -66,7 +66,7 @@ class ItemRepository
      */
     public function find($id): ?Alat
     {
-        return Alat::with('kategori')->find($id);
+        return Alat::with(['kategori', 'units'])->find($id);
     }
 
     /**
