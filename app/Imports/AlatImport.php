@@ -45,9 +45,18 @@ class AlatImport implements ToModel, WithHeadingRow, WithValidation
         } else {
             $this->newCount++;
 
-            // Generate Alat SKU: [CATEGORY (3 chars)]-[NAME (3 chars)]
+            // Smart SKU Generator: [CAT]-[TYPE][MODEL]
             $catPrefix = Str::upper(Str::substr($kategoriNama, 0, 3));
-            $namePrefix = Str::upper(Str::substr($nama, 0, 3));
+
+            $words = explode(' ', trim($nama));
+            if (count($words) >= 2) {
+                $firstWord = Str::upper(Str::substr($words[0], 0, 2));
+                $lastWord = Str::upper(Str::substr(end($words), 0, 3));
+                $namePrefix = $firstWord . $lastWord;
+            } else {
+                $namePrefix = Str::upper(Str::substr($nama, 0, 5));
+            }
+
             $skuBase = $catPrefix . '-' . $namePrefix;
 
             $sku = $skuBase;

@@ -28,15 +28,6 @@
         setTimeout(() => {
             this.isLoading = false;
         }, 1500);
-        this.$watch('form.nama', () => this.generateCode());
-        this.$watch('form.stock', () => this.generateCode());
-    },
-    generateCode() {
-        if (!this.isEditing) return;
-        if (this.form.nama && this.form.nama.length >= 2) {
-            let prefix = this.form.nama.substring(0, 2).toUpperCase();
-            this.form.code = prefix + '-' + (this.form.stock || 0);
-        }
     },
     handleFileSelect(e) {
         const files = e.target.files || e.dataTransfer.files;

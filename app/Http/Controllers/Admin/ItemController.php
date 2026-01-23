@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\AlatExport;
 use App\Http\Controllers\Controller;
 use App\Models\Alat;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class ItemController extends Controller
     public function export(Request $request)
     {
         $items = $this->itemService->exportItems($request->search);
-        return Excel::download(new \App\Exports\AlatExport($items), 'data-alat-' . now()->format('Y-m-d') . '.xlsx');
+        return Excel::download(new AlatExport($items), 'data-alat-' . now()->format('Y-m-d') . '.xlsx');
     }
 
     public function create()

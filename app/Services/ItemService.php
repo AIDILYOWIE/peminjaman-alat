@@ -4,12 +4,16 @@ namespace App\Services;
 
 use App\Repositories\ItemRepository;
 use App\Models\Alat;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\AlatUnit;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Services\LogService;
+use App\Models\Kategori;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class ItemService
 {
@@ -34,7 +38,7 @@ class ItemService
         return $this->itemRepository->getAllPaginated($perPage, $search, $categoryId);
     }
 
-    public function exportItems(?string $search = null): \Illuminate\Support\Collection
+    public function exportItems(?string $search = null): Collection
     {
         return $this->itemRepository->getAllFiltered($search);
     }
@@ -47,22 +51,62 @@ class ItemService
      */
     public function createItem(array $data): Alat
     {
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data) {
             $file = $data['gambar'] ?? null;
+            $stock = $data['stock'] ?? 0;
 
-            // Temporary value for gambar because it's NOT NULL in database
+            // 1. Internal SKU Generation if not manual
+            if (empty($data['code'])) {
+                $category = Kategori::find($data['kategori_id']);
+                $catPrefix = Str::upper(Str::substr($category->nama ?? 'ALAT', 0, 3));
+
+                // Smart Name Logic
+                $words = explode(' ', trim($data['nama']));
+                if (count($words) >= 2) {
+                    $firstWord = Str::upper(Str::substr($words[0], 0, 2));
+                    $lastWord = Str::upper(Str::substr(end($words), 0, 3));
+                    $namePrefix = $firstWord . $lastWord;
+                } else {
+                    $namePrefix = Str::upper(Str::substr($data['nama'], 0, 5));
+                }
+
+                $skuBase = $catPrefix . '-' . $namePrefix;
+
+                $sku = $skuBase;
+                $counter = 1;
+                while (Alat::where('code', $sku)->exists()) {
+                    $sku = $skuBase . '-' . Str::random(3);
+                    if ($counter++ > 5) break;
+                }
+                $data['code'] = $sku;
+            }
+
             $data['gambar'] = 'pending';
-
             $item = $this->itemRepository->create($data);
 
-            if ($file && $file instanceof \Illuminate\Http\UploadedFile) {
-                // Store in folder with item id
+            // 2. Create individual units (Asset Tracking)
+            for ($i = 1; $i <= $stock; $i++) {
+                $unitCode = $item->code . '-' . str_pad($i, 3, '0', STR_PAD_LEFT);
+
+                // Handle collision for unit codes
+                while (AlatUnit::where('unit_code', $unitCode)->exists()) {
+                    $unitCode = $item->code . '-' . str_pad($i + rand(100, 999), 3, '0', STR_PAD_LEFT);
+                }
+
+                AlatUnit::create([
+                    'alat_id'   => $item->id,
+                    'unit_code' => $unitCode,
+                    'status'    => 'ready'
+                ]);
+            }
+
+            if ($file && $file instanceof UploadedFile) {
                 $path = $file->store("items/{$item->id}", 'public');
                 $item->update(['gambar' => $path]);
             }
 
             $this->clearCache();
-            LogService::log('CREATE', "Menambahkan alat baru: {$item->nama} ({$item->code})");
+            LogService::log('CREATE', "Menambahkan alat baru: {$item->nama} ({$item->code}) dengan {$stock} unit.");
             return $item;
         });
     }
@@ -76,7 +120,7 @@ class ItemService
      */
     public function updateItem(Alat $item, array $data): bool
     {
-        if (isset($data['gambar']) && $data['gambar'] instanceof \Illuminate\Http\UploadedFile) {
+        if (isset($data['gambar']) && $data['gambar'] instanceof UploadedFile) {
             // Delete old image
             if ($item->gambar) {
                 Storage::disk('public')->delete($item->gambar);
