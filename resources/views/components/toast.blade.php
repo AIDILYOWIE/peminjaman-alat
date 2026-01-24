@@ -31,7 +31,7 @@
     <div class="flex items-center gap-3">
         <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
             :class="{
-                'bg-green-100 text-green-600': type === 'success',
+                'bg-indigo-100 text-indigo-600': type === 'success',
                 'bg-red-100 text-red-600': type === 'error',
                 'bg-blue-100 text-blue-600': type === 'info'
             }">

@@ -18,7 +18,8 @@ class Peminjaman extends Model
         'tgl_pinjam',
         'denda',
         'status',
-        'keterangan'
+        'keterangan',
+        'invoice_code'
     ];
 
     protected $casts = [
@@ -50,7 +51,16 @@ class Peminjaman extends Model
     public function getTotalTarifDenda()
     {
         return $this->details->sum(function ($detail) {
-            return $detail->alat->denda * $detail->jumlah;
+            return ($detail->alat->denda ?? 0) * $detail->jumlah;
+        });
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($peminjaman) {
+            if (!$peminjaman->invoice_code) {
+                $peminjaman->invoice_code = 'INV-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
+            }
         });
     }
 }

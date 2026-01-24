@@ -92,6 +92,10 @@ Route::middleware('auth')->group(function () {
     // User Routes (Borrowing)
     Route::prefix('borrow')->name('user.borrow.')->middleware('role:peminjam')->group(function () {
         Route::get('/', [BorrowController::class, 'index'])->name('index');
+        Route::get('/checkout', [BorrowController::class, 'checkout'])->name('checkout');
+        Route::post('/checkout', [BorrowController::class, 'store'])->name('store');
+        Route::get('/history', [BorrowController::class, 'history'])->name('history');
+        Route::get('/invoice/{borrowing}', [BorrowController::class, 'invoice'])->name('invoice');
     });
 
     // Staff Routes (Approvals & Returns)
