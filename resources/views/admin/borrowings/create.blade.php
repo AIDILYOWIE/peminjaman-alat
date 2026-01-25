@@ -93,6 +93,14 @@
 
                     <div class="col-span-1 md:col-span-2">
                         <x-input.date
+                            label="Tanggal Peminjaman"
+                            name="borrow_date"
+                            required
+                            description="Tentukan kapan alat harus dipinjam." />
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2">
+                        <x-input.date
                             label="Tanggal Pengembalian"
                             name="return_date"
                             required
