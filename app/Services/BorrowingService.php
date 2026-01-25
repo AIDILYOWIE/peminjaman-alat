@@ -8,6 +8,7 @@ use App\Repositories\BorrowingRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Exception;
 use App\Services\LogService;
 
@@ -271,34 +272,40 @@ class BorrowingService
     {
         return DB::transaction(function () use ($peminjaman, $data, $petugasId) {
             $petugasId = $petugasId ?? Auth::id();
-            $totalAdditionalFine = 0;
+
+            // Calculate late days once
+            $deadline = $peminjaman->tgl_pengembalian->startOfDay();
+            $now = now()->startOfDay();
+            $lateDays = $now->greaterThan($deadline) ? (int) abs($now->diffInDays($deadline)) : 0;
+
+            $totalAccumulatedFine = 0;
 
             foreach ($data['details'] as $detailId => $detailData) {
                 $detail = $peminjaman->details()->find($detailId);
                 if ($detail) {
-                    $itemFine = $detailData['denda_final'] ?? 0;
+                    // 1. Manual fine from staff input (damage/loss/etc)
+                    $manualFine = $detailData['denda_final'] ?? 0;
+
+                    // 2. System calculated late fine for this specific item/units
+                    $itemLateFine = $lateDays * ($detail->alat->denda ?? 0) * $detail->jumlah;
+
+                    // 3. Combined Final Fine for this entry
+                    $finalItemFine = $manualFine + $itemLateFine;
+
                     $detail->update([
-                        'denda_final' => $itemFine,
+                        'denda_final' => $finalItemFine,
                         'keterangan' => $detailData['keterangan'] ?? null,
                     ]);
-                    $totalAdditionalFine += $itemFine;
+
+                    $totalAccumulatedFine += $finalItemFine;
                 }
             }
 
-            // Calculate standard late fine
-            $lateFine = 0;
-            $deadline = $peminjaman->tgl_pengembalian->startOfDay();
-            $now = now()->startOfDay();
-            if ($now->greaterThan($deadline)) {
-                $diffDays = $now->diffInDays($deadline);
-                $lateFine = $diffDays * $peminjaman->getTotalTarifDenda();
-            }
-
-            // Final status update with combined fine
+            // Final status update with combined fine from all details
             $updateData = [
                 'status' => 'selesai',
                 'petugas_id' => $petugasId,
-                'denda' => $lateFine + $totalAdditionalFine,
+                'denda' => $totalAccumulatedFine,
             ];
 
             // Restore stock
@@ -308,7 +315,7 @@ class BorrowingService
                     $detail->unit->update(['status' => 'ready']);
                 }
 
-                $detail->alat->increment('stock', 1);
+                $detail->alat->increment('stock', $detail->jumlah);
             }
 
             $updated = $this->borrowingRepository->update($peminjaman, $updateData);

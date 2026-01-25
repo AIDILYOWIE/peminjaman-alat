@@ -79,11 +79,37 @@ class ReturnController extends Controller
         try {
             $this->borrowingService->processStaffReturn($borrowing, $request->only('details'), Auth::id());
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pengembalian alat berhasil diproses dan diselesaikan.',
+                    'id' => $borrowing->id
+                ]);
+            }
+
             session()->flash('success', 'Pengembalian alat berhasil diproses dan diselesaikan.');
+            session()->flash('last_return_id', $borrowing->id);
             return redirect()->route('staff.returns.index');
         } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
             session()->flash('error', 'Gagal memproses pengembalian: ' . $e->getMessage());
             return back();
         }
+    }
+
+    /**
+     * Display the invoice for a completed return (Staff View).
+     */
+    public function invoice(Peminjaman $borrowing)
+    {
+        // Ensure only 'selesai' borrowings can view this staff invoice
+        if ($borrowing->status !== 'selesai' && $borrowing->status !== 'dipinjam') {
+            // We might want to allow 'dipinjam' for preview or something, 
+            // but user wants it after confirmation (selesai).
+        }
+
+        return view('staff.returns.invoice', compact('borrowing'));
     }
 }

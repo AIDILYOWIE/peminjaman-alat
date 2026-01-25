@@ -21,6 +21,7 @@
         note: '',
         category: ''
     },
+    isSuccess: false,
     openDetail(borrowing) {
         this.selectedBorrowing = borrowing;
         this.form = { 
@@ -28,6 +29,7 @@
             // Ensure tools is an array for manipulation
             tools: JSON.parse(JSON.stringify(borrowing.tools))
         };
+        this.isSuccess = false;
         this.detailOpen = true;
     },
     closeDetail() {
@@ -68,10 +70,13 @@
             }
 
             const result = await response.json();
-            if (response.ok) {
-                window.location.reload();
+            if (response.ok && result.success) {
+                this.isSuccess=true;
+                this.form.status='selesai' ;
+                // No automatic reload to let them click Print PDF
+                // window.location.reload();
             } else {
-                alert(result.message || 'Gagal memproses pengembalian');
+                alert(result.message || 'Gagal memproses pengembalian' );
             }
         } catch (error) {
             console.error(error);
@@ -257,7 +262,7 @@
             <!-- Dynamic Actions -->
             <div class="pt-2">
                 <!-- If Active / Dipinjam -->
-                <div x-show="form.status === 'dipinjam'" class="space-y-3">
+                <div x-show="form.status === 'dipinjam' && !isSuccess" class="space-y-3">
                     <button
                         @click="submitReturn()"
                         :disabled="isLoading"
@@ -277,6 +282,31 @@
                                 <span>Memproses...</span>
                             </div>
                         </template>
+                    </button>
+                </div>
+
+                <!-- If Success / Selesai (Show Print Button) -->
+                <div x-show="isSuccess" class="space-y-4 animate-in fade-in zoom-in duration-300">
+                    <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-4">
+                        <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 animate-bounce">
+                            <x-heroicon-s-check class="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-emerald-900">Pengembalian Berhasil!</p>
+                            <p class="text-xs text-emerald-700">Silakan cetak invoice untuk peminjam.</p>
+                        </div>
+                    </div>
+
+                    <a :href="'{{ url('/staff/returns') }}/' + form.id + '/invoice'" target="_blank"
+                        class="w-full px-4 py-3.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-95 flex items-center justify-center gap-2">
+                        <x-heroicon-o-printer class="w-4 h-4" />
+                        <span>Cetak PDF Invoice</span>
+                    </a>
+
+                    <button @click="window.location.reload()"
+                        class="w-full px-4 py-3.5 bg-gray-100 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                        <x-heroicon-o-arrow-path class="w-4 h-4" />
+                        <span>Selesaikan & Refresh Halaman</span>
                     </button>
                 </div>
             </div>

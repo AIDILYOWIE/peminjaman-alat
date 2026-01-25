@@ -130,20 +130,18 @@
             @endif
 
             @if($isPetugas)
-            <a href="{{ route('staff.approvals.index') }}"
+            <a href="{{ route('staff.transactions.index') }}"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
-                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('staff.approvals.index') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('staff.approvals.index') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
-                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Persetujuan' : ''">
-                <x-heroicon-o-check-circle class="w-5 h-5 opacity-75 flex-shrink-0" />
-                <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="flex-1">Persetujuan</span>
-                <span x-show="!sidebarCollapsed || sidebarOpen" class="bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-medium">3</span>
-            </a>
-            <a href="{{ route('staff.returns.index') }}"
-                class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
-                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('staff.returns.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('staff.returns.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
-                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Proses Kembali' : ''">
-                <x-heroicon-o-arrow-path class="w-5 h-5 opacity-75 flex-shrink-0" />
-                <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Pengembalian</span>
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('staff.transactions.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('staff.transactions.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Transaksi Alat' : ''">
+                <x-heroicon-o-arrows-right-left class="w-5 h-5 opacity-75 flex-shrink-0" />
+                <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="flex-1">Transaksi Alat</span>
+                @php
+                $pendingCount = \App\Models\Peminjaman::where('status', 'pending')->count();
+                @endphp
+                @if($pendingCount > 0)
+                <span x-show="!sidebarCollapsed || sidebarOpen" class="bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-medium">{{ $pendingCount }}</span>
+                @endif
             </a>
             @endif
 

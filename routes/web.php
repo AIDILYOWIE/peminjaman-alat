@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
         if ($user->role === 'admin') return view('dashboard');
-        if ($user->role === 'petugas') return redirect()->route('staff.approvals.index');
+        if ($user->role === 'petugas') return redirect()->route('staff.transactions.index');
         return redirect()->route('user.borrow.index');
     })->name('dashboard');
 
@@ -98,16 +98,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoice/{borrowing}', [BorrowController::class, 'invoice'])->name('invoice');
     });
 
-    // Staff Routes (Approvals & Returns)
+    // Staff Routes (Transactions Unified)
     Route::prefix('staff')->name('staff.')->middleware('role:petugas')->group(function () {
-        Route::prefix('/approvals')->name('approvals.')->group(function () {
-            Route::get('/', [ApprovalController::class, 'index'])->name('index');
-            Route::patch('/{borrowing}/status', [ApprovalController::class, 'updateStatus'])->name('update-status');
-        });
-
-        Route::prefix('/returns')->name('returns.')->group(function () {
-            Route::get('/', [StaffReturnController::class, 'index'])->name('index');
-            Route::patch('/{borrowing}/approve', [StaffReturnController::class, 'approve'])->name('approve');
+        Route::prefix('/transactions')->name('transactions.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Staff\TransactionController::class, 'index'])->name('index');
+            Route::patch('/{borrowing}/approve', [\App\Http\Controllers\Staff\TransactionController::class, 'approveRequest'])->name('approve-request');
+            Route::patch('/{borrowing}/return', [\App\Http\Controllers\Staff\TransactionController::class, 'processReturn'])->name('process-return');
+            Route::get('/{borrowing}/invoice', [\App\Http\Controllers\Staff\TransactionController::class, 'invoice'])->name('invoice');
         });
     });
 });
