@@ -149,18 +149,6 @@
             this.form.live_fine = 0;
         }
     },
-    updateStatus(status) {
-        this.$dispatch('open-confirm', {
-            title: status === 'dipinjam' ? 'Setujui Peminjaman' : 'Tolak Peminjaman',
-            message: status === 'dipinjam' 
-                ? 'Apakah Anda yakin ingin menyetujui peminjaman ini? Stok alat akan otomatis berkurang.' 
-                : 'Apakah Anda yakin ingin menolak peminjaman ini?',
-            confirmText: status === 'dipinjam' ? 'Ya, Setujui' : 'Ya, Tolak',
-            onConfirm: () => {
-                this.submitStatus(status);
-            }
-        });
-    },
     submitStatus(status) {
         this.isSubmitting = true;
         let form = document.createElement('form');
@@ -374,23 +362,6 @@
                     </form>
                 </div>
             </div>
-
-            <!-- Action Buttons for Pending Status -->
-            <template x-if="form.status === 'pending' && !isEditing">
-                <div class="p-6 bg-gray-50/50 border-t border-gray-100 sticky bottom-0">
-                    <div class="grid grid-cols-2 gap-4">
-                        <button @click="updateStatus('ditolak')"
-                            class="cursor-pointer px-4 py-3.5 bg-white border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2 active:scale-95">
-                            <x-heroicon-o-x-circle class="w-4 h-4" /> Tolak
-                        </button>
-                        <button @click="updateStatus('dipinjam')"
-                            class="cursor-pointer px-4 py-3.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95">
-                            <x-heroicon-o-check-badge class="w-4 h-4" /> Setujui
-                        </button>
-                    </div>
-                </div>
-            </template>
-
             <form x-ref="deleteForm" :action="'{{ route('admin.borrowings.index') }}/' + form.id" method="POST" class="hidden">
                 @csrf
                 @method('DELETE')

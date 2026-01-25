@@ -88,12 +88,10 @@ class BorrowingService
                 }
 
                 // Create individual detail records for each unit (Asset Tracking)
-                for ($i = 0; $i < $item['jumlah']; $i++) {
-                    $borrowing->details()->create([
-                        'alat_id' => $item['alat_id'],
-                        'jumlah'  => 1, // Fixed to 1 for individual tracking
-                    ]);
-                }
+                $borrowing->details()->create([
+                    'alat_id' => $item['alat_id'],
+                    'jumlah'  => $item['jumlah'],
+                ]);
             }
 
             if ($borrowing->peminjam->username) {
