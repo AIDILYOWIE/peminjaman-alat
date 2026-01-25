@@ -3,8 +3,10 @@
 @section('content')
 <div class="max-w-5xl mx-auto" x-data="{ 
     basket: [],
+    borrowDate: '',
     returnDate: '',
     keterangan: '',
+    selectedItem: null,
     isSubmitting: false,
     init() {
         const stored = localStorage.getItem('borrow_basket');
@@ -18,9 +20,11 @@
         return this.basket.reduce((sum, item) => sum + item.qty, 0);
     },
     async submitBorrowing() {
+        if (!this.borrowDate) {
+            return this.showToast('Harap pilih tanggal peminjaman.', 'error');
+        }
         if (!this.returnDate) {
-            this.showToast('Harap pilih tanggal pengembalian.', 'error');
-            return;
+            return this.showToast('Harap pilih tanggal pengembalian.', 'error');
         }
 
         this.isSubmitting = true;
@@ -32,11 +36,12 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({
+                    borrow_date: this.borrowDate,
                     return_date: this.returnDate,
                     keterangan: this.keterangan,
                     items: this.basket.map(item => ({
                         alat_id: item.id,
-                        qty: item.qty
+                        jumlah: item.qty
                     }))
                 })
             });
@@ -56,6 +61,17 @@
             this.showToast('Terjadi kesalahan saat mengirim permintaan.', 'error');
         } finally {
             this.isSubmitting = false;
+        }
+    },
+    validateQty(item) {
+        if (item.qty > item.stock) item.qty = item.stock;
+        if (item.qty < 1) item.qty = 1;
+        this.save();
+    },
+    save() {
+        localStorage.setItem('borrow_basket', JSON.stringify(this.basket));
+        if (Alpine.store('cart')) {
+            Alpine.store('cart').items = JSON.parse(JSON.stringify(this.basket));
         }
     },
     showToast(msg, type) {
@@ -89,16 +105,41 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-4">Daftar Alat</h2>
                 <div class="divide-y divide-gray-100">
                     <template x-for="item in basket" :key="item.id">
-                        <div class="py-4 flex gap-4 animate-fadeIn">
-                            <div class="w-20 h-20 bg-gray-50 rounded-xl border border-gray-100 flex-shrink-0 overflow-hidden">
-                                <img :src="'/storage/' + item.gambar" :alt="item.nama" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-gray-900" x-text="item.nama"></h3>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1" x-text="item.code"></p>
-                                <div class="mt-2 text-sm font-medium text-gray-600">
-                                    <span x-text="item.qty"></span> Unit
+                        <div class="py-6 flex justify-between items-start animate-fadeIn">
+                            <div class="flex gap-4">
+                                <div class="w-16 h-16 bg-gray-50 rounded-xl border border-gray-100 flex-shrink-0 overflow-hidden">
+                                    <img :src="'/storage/' + item.gambar" :alt="item.nama" class="w-full h-full object-cover">
                                 </div>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-gray-900" x-text="item.nama"></h3>
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1" x-text="item.code"></p>
+                                    <div class="mt-2 text-sm font-medium text-gray-600">
+                                        <span x-text="item.qty"></span> Unit
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Compact Quantity Controls -->
+                            <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-full p-1 shadow-sm shrink-0">
+                                <button
+                                    type="button"
+                                    @click="if(item.qty > 1) item.qty--; save()"
+                                    class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all active:scale-90">
+                                    <x-heroicon-o-minus class="w-3.5 h-3.5" />
+                                </button>
+                                <input
+                                    type="number"
+                                    x-model.number="item.qty"
+                                    @input="validateQty(item)"
+                                    class="w-6 text-center bg-transparent border-none text-xs font-black text-gray-900 focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    readonly>
+                                <button
+                                    type="button"
+                                    @click="if(item.qty < item.stock) item.qty++; save()"
+                                    :disabled="item.qty >= item.stock"
+                                    class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed">
+                                    <x-heroicon-s-plus class="w-3.5 h-3.5" />
+                                </button>
                             </div>
                         </div>
                     </template>
@@ -110,8 +151,13 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-4">Detail Peminjaman</h2>
                 <div class="space-y-4">
                     <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Tanggal Peminjaman</label>
+                        <input type="date" x-model="borrowDate" min="{{ date('Y-m-d') }}"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                    </div>
+                    <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Tanggal Pengembalian</label>
-                        <input type="date" x-model="returnDate"
+                        <input type="date" x-model="returnDate" min="{{ date('Y-m-d') }}"
                             class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all">
                         <p class="mt-2 text-[10px] text-gray-500 italic">* Harap kembalikan alat sebelum jam operasional berakhir pada tanggal tersebut.</p>
                     </div>
@@ -139,14 +185,6 @@
                         <span class="text-gray-500">Biaya Admin</span>
                         <span class="font-bold text-indigo-600">Gratis</span>
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-500">Denda Terlambat</span>
-                        <span class="font-bold text-red-500">Rp 5.000 / hari</span>
-                    </div>
-                    <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
-                        <span class="text-base font-black text-gray-900">Total Biaya</span>
-                        <span class="text-xl font-black text-indigo-600">Rp 0</span>
-                    </div>
                 </div>
 
                 <div class="p-4 bg-yellow-50 rounded-2xl border border-yellow-100 mb-8">
@@ -160,14 +198,14 @@
 
                 <button @click="submitBorrowing()"
                     :disabled="isSubmitting"
-                    class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
+                    class="w-full cursor-pointer     bg-indigo-600 text-white font-semibold py-2 rounded-lg shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
                     <template x-if="isSubmitting">
                         <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </template>
-                    <span x-text="isSubmitting ? 'Memproses...' : 'Ajukan Peminjaman'"></span>
+                    <span x-text="isSubmitting ? 'Memproses...' : 'Ajukan'"></span>
                 </button>
             </div>
         </div>

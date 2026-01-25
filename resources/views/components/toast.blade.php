@@ -11,6 +11,7 @@
         }
     }"
     x-init="
+        window.addEventListener('toast', (e) => { showToast(e.detail.message, e.detail.type) });
         @if(session('success'))
             showToast('{{ session('success') }}', 'success');
         @elseif(session('error'))

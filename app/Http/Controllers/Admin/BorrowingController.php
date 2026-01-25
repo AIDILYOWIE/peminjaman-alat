@@ -43,7 +43,7 @@ class BorrowingController extends Controller
                 'remaining_duration' => (string) $item->getSisaDurasi(),
                 'total_fine_rate' => $item->getTotalTarifDenda(),
                 'return_date' => $item->tgl_pengembalian->format('d M Y'),
-                'borrow_date' => $item->tgl_pinjam ? $item->tgl_pinjam->format('d M Y') : '-',
+                'borrow_date' => $item->tgl_pinjam ? $item->tgl_pinjam->format('d M Y') : null,
                 'return_date_raw' => $item->tgl_pengembalian->format('Y-m-d'),
                 'return_date_iso' => $item->tgl_pengembalian->format('Y-m-d\TH:i:s'),
                 'borrow_date_raw' => $item->tgl_pinjam ? $item->tgl_pinjam->format('Y-m-d') : null,

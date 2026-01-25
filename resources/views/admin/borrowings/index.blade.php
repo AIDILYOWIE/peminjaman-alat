@@ -148,6 +148,39 @@
         } else {
             this.form.live_fine = 0;
         }
+    },
+    updateStatus(status) {
+        this.$dispatch('open-confirm', {
+            title: status === 'dipinjam' ? 'Setujui Peminjaman' : 'Tolak Peminjaman',
+            message: status === 'dipinjam' 
+                ? 'Apakah Anda yakin ingin menyetujui peminjaman ini? Stok alat akan otomatis berkurang.' 
+                : 'Apakah Anda yakin ingin menolak peminjaman ini?',
+            confirmText: status === 'dipinjam' ? 'Ya, Setujui' : 'Ya, Tolak',
+            onConfirm: () => {
+                this.submitStatus(status);
+            }
+        });
+    },
+    submitStatus(status) {
+        this.isSubmitting = true;
+        let form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/borrowings/${this.form.id}/status`;
+        
+        let csrf = document.createElement('input');
+        csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
+        
+        let method = document.createElement('input');
+        method.type = 'hidden'; method.name = '_method'; method.value = 'PATCH';
+
+        let statusInput = document.createElement('input');
+        statusInput.type = 'hidden'; statusInput.name = 'status'; statusInput.value = status;
+        
+        form.appendChild(csrf);
+        form.appendChild(method);
+        form.appendChild(statusInput);
+        document.body.appendChild(form);
+        form.submit();
     }
 }">
     @php
@@ -230,113 +263,133 @@
             </template>
         </x-slot:headerActions>
 
-        <!-- Header: Hero Status -->
-        <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">
-            <div class="flex items-start justify-between sm:mb-6 mb-4">
-                <div class="flex-1">
-                    <div class="inline-flex items-center sm:gap-2 gap-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-3">
-                        <x-heroicon-s-tag class="w-3 h-3" />
-                        <span x-text="form.status_label"></span>
-                    </div>
-                    <h3 class="sm:text-2xl text-xl font-bold truncate max-w-[200px]" x-text="form.name"></h3>
-                    <p class="text-indigo-100 sm:text-sm text-xs" x-text="form.role"></p>
-                </div>
-                <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                    <x-heroicon-o-calendar-days class="w-10 h-10 text-white/80" />
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
-                    <div class="text-xs text-indigo-100 mb-1">Jumlah Item</div>
-                    <div class="sm:text-lg text-base font-bold" x-text="form.qty"></div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
-                    <div class="text-xs text-indigo-100 mb-1">Denda</div>
-                    <div class="sm:text-lg text-base font-bold" x-text="'Rp ' + (form.status === 'dipinjam' ? (form.live_fine || 0).toLocaleString('id-ID') : (form.fine || 0).toLocaleString('id-ID'))"></div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
-                    <div class="text-xs text-indigo-100 mb-1">Sisa Durasi</div>
-                    <div class="sm:text-lg text-base font-bold" x-text="form.remaining_duration"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="p-6 space-y-6">
-            <form x-ref="editBorrowingForm" :action="'/admin/borrowings/' + form.id" method="POST">
-                @csrf
-                @method('PUT')
-
-                <input type="hidden" name="user_id" :value="form.user_id">
-
-                <!-- Tools List Card -->
-                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                    <template x-if="!isEditing">
-                        <div>
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                                    <x-heroicon-o-cube class="w-5 h-5 text-indigo-600" />
-                                </div>
-                                <h4 class="text-sm font-bold text-gray-900">Alat yang Dipinjam</h4>
+        <div class="flex flex-col min-h-full">
+            <div class="flex-1">
+                <!-- Header: Hero Status -->
+                <div class="relative bg-gradient-to-br from-indigo-500 to-indigo-600 sm:p-8 p-4 text-white">
+                    <div class="flex items-start justify-between sm:mb-6 mb-4">
+                        <div class="flex-1">
+                            <div class="inline-flex items-center sm:gap-2 gap-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium mb-3">
+                                <x-heroicon-s-tag class="w-3 h-3" />
+                                <span x-text="form.status_label"></span>
                             </div>
-                            <div class="space-y-3">
-                                <template x-for="tool in form.details" :key="tool.alat_id || tool.name">
-                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
-                                        <span class="text-sm font-medium text-gray-700" x-text="tool.name"></span>
-                                        <span class="text-xs font-semibold bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 text-indigo-600" x-text="tool.jumlah + ' Unit'"></span>
+                            <h3 class="sm:text-2xl text-xl font-bold truncate max-w-[200px]" x-text="form.name"></h3>
+                            <p class="text-indigo-100 sm:text-sm text-xs" x-text="form.role"></p>
+                        </div>
+                        <div class="flex-shrink-0 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                            <x-heroicon-o-calendar-days class="w-10 h-10 text-white/80" />
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
+                            <div class="text-xs text-indigo-100 mb-1">Jumlah Item</div>
+                            <div class="sm:text-lg text-base font-bold" x-text="form.qty"></div>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
+                            <div class="text-xs text-indigo-100 mb-1">Denda</div>
+                            <div class="sm:text-lg text-base font-bold" x-text="'Rp ' + (form.status === 'dipinjam' ? (form.live_fine || 0).toLocaleString('id-ID') : (form.fine || 0).toLocaleString('id-ID'))"></div>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 text-left">
+                            <div class="text-xs text-indigo-100 mb-1">Sisa Durasi</div>
+                            <div class="sm:text-lg text-base font-bold" x-text="form.remaining_duration"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <form x-ref="editBorrowingForm" :action="'/admin/borrowings/' + form.id" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <input type="hidden" name="user_id" :value="form.user_id">
+
+                        <!-- Tools List Card -->
+                        <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                            <template x-if="!isEditing">
+                                <div>
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                            <x-heroicon-o-cube class="w-5 h-5 text-indigo-600" />
+                                        </div>
+                                        <h4 class="text-sm font-bold text-gray-900">Alat yang Dipinjam</h4>
                                     </div>
-                                </template>
+                                    <div class="space-y-3">
+                                        <template x-for="tool in form.details" :key="tool.alat_id || tool.name">
+                                            <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100">
+                                                <span class="text-sm font-medium text-gray-700" x-text="tool.name"></span>
+                                                <span class="text-xs font-semibold bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 text-indigo-600" x-text="tool.jumlah + ' Unit'"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="isEditing">
+                                <x-input.tool-list
+                                    label="Edit Daftar Alat"
+                                    :items="$items"
+                                    x-init="populate(form.details)"
+                                    classItem="" />
+                            </template>
+                        </div>
+
+                        <!-- Timeline Section -->
+                        <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                                        <x-heroicon-o-clock class="w-5 h-5 text-amber-600" />
+                                    </div>
+                                    <h4 class="text-sm font-bold text-gray-900">Waktu & Transaksi</h4>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <x-input.date ::disabled="!isEditing && !isRescheduling" name="return_date" label="Batas Kembali" required="true" x-model="form.return_date_raw" />
+                                        </div>
+                                        <div>
+                                            <x-input.date ::disabled="!isEditing" name="borrow_date" label="Waktu Pinjam" required="true" x-model="form.borrow_date_raw" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-500 mb-2">Petugas Approval</label>
+                                            <p class="text-sm font-medium text-gray-900" x-text="form.staff_name"></p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-500 mb-2">Catatan/Keperluan</label>
+                                            <template x-if="!isRescheduling && !isEditing">
+                                                <p class="text-sm font-medium text-gray-600 italic" x-text="form.note || '-'"></p>
+                                            </template>
+                                            <template x-if="isRescheduling || isEditing">
+                                                <textarea x-model="form.note" class="p-2 w-full text-xs border-gray-200 rounded-lg focus:outline-none border border-gray-200" rows="2"></textarea>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </template>
-                    <template x-if="isEditing">
-                        <x-input.tool-list
-                            label="Edit Daftar Alat"
-                            :items="$items"
-                            x-init="populate(form.details)"
-                            classItem="" />
-                    </template>
+                    </form>
                 </div>
+            </div>
 
-                <!-- Timeline Section -->
-                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                    <div>
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                                <x-heroicon-o-clock class="w-5 h-5 text-amber-600" />
-                            </div>
-                            <h4 class="text-sm font-bold text-gray-900">Waktu & Transaksi</h4>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <x-input.date ::disabled="!isEditing && !isRescheduling" name="return_date" label="Batas Kembali" required="true" x-model="form.return_date_raw" />
-                                </div>
-                                <div>
-                                    <x-input.date ::disabled="!isEditing" name="borrow_date" label="Waktu Pinjam" required="true" x-model="form.borrow_date_raw" />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 mb-2">Petugas Approval</label>
-                                    <p class="text-sm font-medium text-gray-900" x-text="form.staff_name"></p>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 mb-2">Catatan/Keperluan</label>
-                                    <template x-if="!isRescheduling && !isEditing">
-                                        <p class="text-sm font-medium text-gray-600 italic" x-text="form.note || '-'"></p>
-                                    </template>
-                                    <template x-if="isRescheduling || isEditing">
-                                        <textarea x-model="form.note" class="p-2 w-full text-xs border-gray-200 rounded-lg focus:outline-none border border-gray-200" rows="2"></textarea>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Action Buttons for Pending Status -->
+            <template x-if="form.status === 'pending' && !isEditing">
+                <div class="p-6 bg-gray-50/50 border-t border-gray-100 sticky bottom-0">
+                    <div class="grid grid-cols-2 gap-4">
+                        <button @click="updateStatus('ditolak')"
+                            class="cursor-pointer px-4 py-3.5 bg-white border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2 active:scale-95">
+                            <x-heroicon-o-x-circle class="w-4 h-4" /> Tolak
+                        </button>
+                        <button @click="updateStatus('dipinjam')"
+                            class="cursor-pointer px-4 py-3.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95">
+                            <x-heroicon-o-check-badge class="w-4 h-4" /> Setujui
+                        </button>
                     </div>
                 </div>
-            </form>
+            </template>
 
             <form x-ref="deleteForm" :action="'{{ route('admin.borrowings.index') }}/' + form.id" method="POST" class="hidden">
                 @csrf

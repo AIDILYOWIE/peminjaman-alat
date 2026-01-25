@@ -5,14 +5,20 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Kategori;
 use App\Services\ItemService;
+use App\Http\Requests\User\StoreBorrowingRequest;
+use App\Services\BorrowingService;
+use Illuminate\Support\Facades\Auth;
+use Exception;
 use Illuminate\Http\Request;
+use App\Models\Peminjaman;
+use Illuminate\Support\Facades\Cache;
 
 class BorrowController extends Controller
 {
     protected $itemService;
     protected $borrowingService;
 
-    public function __construct(ItemService $itemService, \App\Services\BorrowingService $borrowingService)
+    public function __construct(ItemService $itemService, BorrowingService $borrowingService)
     {
         $this->itemService = $itemService;
         $this->borrowingService = $borrowingService;
@@ -30,12 +36,12 @@ class BorrowController extends Controller
         // Cache key based on fillers and page
         $cacheKey = "catalog_search_{$search}_cat_{$category}_page_{$page}";
 
-        $items = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function () use ($search, $category) {
+        $items = Cache::remember($cacheKey, 60, function () use ($search, $category) {
             return $this->itemService->getAllItems(10, $search, $category);
         });
 
         // Cache categories generally
-        $categories = \Illuminate\Support\Facades\Cache::remember('catalog_categories', 300, function () {
+        $categories = Cache::remember('catalog_categories', 300, function () {
             return Kategori::withCount('alat')->get();
         });
 
@@ -50,40 +56,20 @@ class BorrowController extends Controller
         return view('user.borrow.checkout');
     }
 
-    /**
-     * Store a new borrowing request.
-     */
-    public function store(Request $request)
+    public function store(StoreBorrowingRequest $request)
     {
-        $request->validate([
-            'return_date' => 'required|date|after_or_equal:today',
-            'items' => 'required|array',
-            'items.*.alat_id' => 'required|exists:alat,id',
-            'items.*.qty' => 'required|integer|min:1',
-            'keterangan' => 'nullable|string'
-        ]);
-
         try {
-            $formattedItems = array_map(function ($item) {
-                return [
-                    'alat_id' => $item['alat_id'],
-                    'jumlah' => $item['qty']
-                ];
-            }, $request->items);
+            $data = $request->validated();
+            $data['user_id'] = Auth::id();
 
-            $borrowing = $this->borrowingService->storeBorrowing([
-                'user_id' => auth()->id(),
-                'return_date' => $request->return_date,
-                'items' => $formattedItems,
-                'keterangan' => $request->keterangan
-            ]);
+            $this->borrowingService->storeBorrowing($data);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Peminjaman berhasil diajukan!',
                 'redirect' => route('user.borrow.history')
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -96,8 +82,8 @@ class BorrowController extends Controller
      */
     public function history()
     {
-        $borrowings = \App\Models\Peminjaman::with(['details.alat', 'petugas'])
-            ->where('user_id', auth()->id())
+        $borrowings = Peminjaman::with(['details.alat', 'petugas'])
+            ->where('user_id', Auth::id())
             ->latest()
             ->paginate(10);
 
@@ -107,10 +93,10 @@ class BorrowController extends Controller
     /**
      * Display digital invoice for a borrowing.
      */
-    public function invoice(\App\Models\Peminjaman $borrowing)
+    public function invoice(Peminjaman $borrowing)
     {
         // Ensure user owns this borrowing
-        if ($borrowing->user_id !== auth()->id()) {
+        if ($borrowing->user_id !== Auth::id()) {
             abort(403);
         }
 

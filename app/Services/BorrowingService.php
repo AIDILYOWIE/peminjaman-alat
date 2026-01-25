@@ -69,11 +69,12 @@ class BorrowingService
     {
         return DB::transaction(function () use ($data) {
             // 1. Create main borrowing record
+            $userId = $data['user_id'] ?? Auth::id();
             $borrowing = $this->borrowingRepository->create([
-                'user_id' => $data['user_id'],
+                'user_id' => $userId,
                 'tgl_pengembalian' => $data['return_date'],
                 'status' => 'pending',
-                'tgl_pinjam' => null, // Filled on approval
+                'tgl_pinjam' => $data['borrow_date'] ?? null,
                 'keterangan' => $data['keterangan'] ?? null,
             ]);
 
@@ -95,7 +96,12 @@ class BorrowingService
                 }
             }
 
-            LogService::log('CREATE', "Mengajukan peminjaman baru untuk: {$borrowing->peminjam->username}");
+            if ($borrowing->peminjam->username) {
+                LogService::log('CREATE', "Mengajukan peminjaman baru untuk: {$borrowing->peminjam->username}");
+            } else {
+                $username = Auth::user()->username ?? '#User';
+                LogService::log('CREATE', "Mengajukan peminjaman baru untuk: {$username}");
+            }
             return $borrowing;
         });
     }
