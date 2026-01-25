@@ -61,7 +61,7 @@
                 <div class="bg-gray-50 px-6 py-4 flex flex-row-reverse gap-3">
                     <button type="submit"
                         :disabled="isSubmitting"
-                        class="inline-flex justify-center items-center py-2 px-4 shadow-sm text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px]">
+                        class="cursor-pointer inline-flex justify-center items-center py-2 px-4 shadow-sm text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px]">
                         <span x-show="!isSubmitting">Import</span>
                         <span x-show="isSubmitting" class="flex items-center gap-2">
                             <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

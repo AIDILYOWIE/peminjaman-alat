@@ -19,7 +19,8 @@
         stock: 0,
         deskripsi: '',
         gambar: '',
-        denda: 0
+        denda: 0,
+        units: []
     },
     imageFile: null,
     imageUrl: null,

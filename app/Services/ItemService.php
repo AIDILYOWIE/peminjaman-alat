@@ -120,24 +120,75 @@ class ItemService
      */
     public function updateItem(Alat $item, array $data): bool
     {
-        if (isset($data['gambar']) && $data['gambar'] instanceof UploadedFile) {
-            // Delete old image
-            if ($item->gambar) {
-                Storage::disk('public')->delete($item->gambar);
+        return DB::transaction(function () use ($item, $data) {
+            if (isset($data['gambar']) && $data['gambar'] instanceof UploadedFile) {
+                if ($item->gambar) {
+                    Storage::disk('public')->delete($item->gambar);
+                }
+                $data['gambar'] = $data['gambar']->store("items/{$item->id}", 'public');
+            } else {
+                unset($data['gambar']);
             }
-            // Store in folder with item id
-            $data['gambar'] = $data['gambar']->store("items/{$item->id}", 'public');
-        } else {
-            // Avoid overwriting existing image with null
-            unset($data['gambar']);
-        }
 
-        $updated = $this->itemRepository->update($item, $data);
-        if ($updated) {
-            $this->clearCache();
-            LogService::log('UPDATE', "Memperbarui data alat: {$item->nama} ({$item->code})");
-        }
-        return $updated;
+            // Asset Tracking Synchronization Logic
+            if (isset($data['stock'])) {
+                $oldStock = $item->stock;
+                $newStock = (int)$data['stock'];
+                $diff = $newStock - $oldStock;
+
+                if ($diff > 0) {
+                    // Scenario: Increase Stock -> Add new units
+                    for ($i = 1; $i <= $diff; $i++) {
+                        // Find the highest sequence number for this item's unit codes
+                        $lastUnit = AlatUnit::where('alat_id', $item->id)
+                            ->orderBy('id', 'desc')
+                            ->first();
+
+                        $sequence = 1;
+                        if ($lastUnit && preg_match('/-(\d+)$/', $lastUnit->unit_code, $matches)) {
+                            $sequence = (int)$matches[1] + 1;
+                        }
+
+                        $unitCode = $item->code . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+
+                        // Collision check
+                        while (AlatUnit::where('unit_code', $unitCode)->exists()) {
+                            $sequence++;
+                            $unitCode = $item->code . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+                        }
+
+                        AlatUnit::create([
+                            'alat_id'   => $item->id,
+                            'unit_code' => $unitCode,
+                            'status'    => 'ready'
+                        ]);
+                    }
+                } elseif ($diff < 0) {
+                    // Scenario: Decrease Stock -> Remove 'ready' units
+                    $removeCount = abs($diff);
+                    $readyUnits = AlatUnit::where('alat_id', $item->id)
+                        ->where('status', 'ready')
+                        ->orderBy('id', 'desc')
+                        ->limit($removeCount)
+                        ->get();
+
+                    if ($readyUnits->count() < $removeCount) {
+                        throw new \Exception("Gagal mengurangi stok. Hanya tersedia {$readyUnits->count()} unit dalam kondisi 'ready', sedangkan Anda mencoba mengurangi {$removeCount} unit. Sebagian alat sedang dipinjam atau tidak tersedia.");
+                    }
+
+                    foreach ($readyUnits as $unit) {
+                        $unit->delete();
+                    }
+                }
+            }
+
+            $updated = $this->itemRepository->update($item, $data);
+            if ($updated) {
+                $this->clearCache();
+                LogService::log('UPDATE', "Memperbarui data alat: {$item->nama} ({$item->code}). Stok disesuaikan dari " . ($oldStock ?? $item->stock) . " ke " . ($data['stock'] ?? $item->stock));
+            }
+            return $updated;
+        });
     }
 
     /**
