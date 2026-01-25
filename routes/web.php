@@ -104,6 +104,7 @@ Route::middleware('auth')->group(function () {
     // Staff Routes (Transactions Unified)
     Route::prefix('staff')->name('staff.')->middleware('role:petugas')->group(function () {
         Route::prefix('/transactions')->name('transactions.')->group(function () {
+            Route::get('/export', [\App\Http\Controllers\Staff\TransactionController::class, 'export'])->name('export');
             Route::get('/', [\App\Http\Controllers\Staff\TransactionController::class, 'index'])->name('index');
             Route::patch('/{borrowing}/approve', [\App\Http\Controllers\Staff\TransactionController::class, 'approveRequest'])->name('approve-request');
             Route::patch('/{borrowing}/return', [\App\Http\Controllers\Staff\TransactionController::class, 'processReturn'])->name('process-return');

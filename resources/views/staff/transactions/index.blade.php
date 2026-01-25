@@ -151,7 +151,8 @@
             paginated="true"
             searchPlaceholder="Cari transaksi..."
             :hasFilter="false"
-            :hasExport="false"
+            canExport="true"
+            :exportRoute="route('staff.transactions.export')"
             onRowClick="openDetail($row)">
 
             @if($currentTab === 'riwayat')

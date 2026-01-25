@@ -150,4 +150,16 @@ class TransactionController extends Controller
     {
         return view('staff.returns.invoice', compact('borrowing'));
     }
+
+    /**
+     * Export transaction data to Excel.
+     */
+    public function export(Request $request)
+    {
+        $borrowings = $this->borrowingService->exportBorrowings($request->search);
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\BorrowingExport($borrowings),
+            'data-transaksi-' . date('Y-m-d') . '.xlsx'
+        );
+    }
 }
