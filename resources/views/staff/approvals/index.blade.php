@@ -42,6 +42,8 @@
             title: status === 'dipinjam' ? 'Setujui Peminjaman' : 'Tolak Peminjaman',
             message: status === 'dipinjam' ? 'Apakah Anda yakin ingin menyetujui permintaan ini?' : 'Apakah Anda yakin ingin menolak permintaan ini?',
             confirmText: status === 'dipinjam' ? 'Ya, Setujui' : 'Ya, Tolak',
+            type: status === 'dipinjam' ? 'info' : 'danger',
+            icon: status === 'dipinjam' ? 'heroicon-o-check-badge' : 'heroicon-o-x-circle',
             onConfirm: () => {
                 this.submitStatus(status);
             }

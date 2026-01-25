@@ -40,6 +40,8 @@
             title: 'Konfirmasi Pengembalian',
             message: 'Apakah Anda yakin ingin menyelesaikan pengembalian ini?',
             confirmText: 'Konfirmasi',
+            type: 'info',
+            icon: 'heroicon-m-check-badge',
             onConfirm: () => this.executeReturn()
         });
     },

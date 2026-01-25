@@ -89,6 +89,7 @@
             title: 'Hapus Alat',
             message: 'Apakah Anda yakin ingin menghapus alat ini? Tindakan ini tidak dapat dibatalkan.',
             confirmText: 'Ya, Hapus',
+            type: 'danger',
             onConfirm: () => {
                 this.isSubmitting = true;
                 this.$refs.deleteForm.submit();

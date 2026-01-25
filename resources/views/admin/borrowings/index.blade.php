@@ -83,6 +83,7 @@
             title: 'Hapus Peminjaman',
             message: 'Apakah Anda yakin ingin menghapus peminjaman ini? Tindakan ini tidak dapat dibatalkan.',
             confirmText: 'Ya, Hapus',
+            type: 'danger',
             onConfirm: () => {
                 this.isSubmitting = true;
                 this.$refs.deleteForm.submit();
