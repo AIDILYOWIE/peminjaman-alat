@@ -154,8 +154,21 @@
                 <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Pinjam Alat</span>
             </a>
             @endif
-
         </div>
+
+        {{-- Group System --}}
+        @if($isAdmin)
+        <div x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'pb-2' : 'pb-6'">
+            <p x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">System</p>
+            <a href="{{ route('admin.activity-logs.index') }}"
+                class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative"
+                x-bind:class="(sidebarCollapsed && !sidebarOpen) ? 'justify-center {{ request()->routeIs('admin.activity-logs.*') ? 'bg-indigo-50 text-indigo-700' : '' }} hover:bg-gray-50 hover:text-indigo-600' : 'gap-3 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 {{ request()->routeIs('admin.activity-logs.*') ? 'bg-indigo-50 text-indigo-700' : '' }}'"
+                x-bind:title="(sidebarCollapsed && !sidebarOpen) ? 'Log Aktivitas' : ''">
+                <x-heroicon-o-clipboard-document-list class="w-5 h-5 opacity-75 flex-shrink-0" />
+                <span x-show="!sidebarCollapsed || sidebarOpen" x-transition.opacity>Log Aktivitas</span>
+            </a>
+        </div>
+        @endif
     </nav>
     </nav>
 

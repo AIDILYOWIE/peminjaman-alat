@@ -87,6 +87,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/create', [ReturnController::class, 'create'])->name('create');
             Route::post('/', [ReturnController::class, 'store'])->name('store');
         });
+
+        // Activity Logs
+        Route::get('/activity-logs', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 
     // User Routes (Borrowing)
