@@ -135,13 +135,17 @@
         @php
         $columns = [
         ['label' => 'Peminjam', 'key' => 'name', 'component' => 'info', 'map' => ['subtitle' => 'no_induk', 'icon' => 'avatar'], 'class' => 'w-full'],
-        ['label' => 'Daftar Alat', 'key' => 'tools_list', 'class' => 'w-full min-w-[300px]'],
+        [
+        'label' => 'Alat',
+        'key' => 'tools_list',
+        'class' => 'w-full min-w-[150px] sm:min-w-[500px]'
+        ],
         ];
 
         if($currentTab === 'riwayat') {
-        $columns[] = ['label' => 'Total Denda', 'key' => 'fine', 'class' => 'text-right font-bold text-rose-600'];
+        $columns[] = ['label' => 'Total Denda', 'key' => 'fine', 'class' => 'text-right font-bold text-rose-600 w-full min-w-[150px] sm:min-w-[200px]'];
         } else {
-        $columns[] = ['label' => 'Tenggat', 'key' => 'return_date', 'hidden' => 'hidden sm:table-cell'];
+        $columns[] = ['label' => 'Tenggat', 'key' => 'return_date', 'hidden' => 'hidden sm:table-cell', 'class' => 'w-full min-w-[150px] sm:min-w-[200px]'];
         }
 
         $columns[] = ['label' => 'Status', 'key' => 'status', 'component' => 'badge', 'map' => ['color' => 'status_color', 'label' => 'status_label']];

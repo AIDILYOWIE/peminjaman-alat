@@ -128,15 +128,7 @@ class TransactionController extends Controller
                 'message' => 'Pengembalian berhasil diproses.',
                 'id' => $borrowing->id,
                 'fine' => $borrowing->denda,
-                'tools' => $borrowing->details->map(fn($d) => [
-                    'id' => $d->id,
-                    'name' => $d->alat->nama,
-                    'unit_code' => $d->unit->unit_code ?? null,
-                    'qty' => $d->jumlah,
-                    'fine_rate' => $d->alat->denda ?? 0,
-                    'denda_final' => $d->denda_final ?? 0,
-                    'keterangan' => $d->keterangan ?? ''
-                ])
+                'tools' => $borrowing->details->map(fn($d) => $d->unit ? $d->unit->unit_code : $d->alat->nama)->implode(', ')
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
