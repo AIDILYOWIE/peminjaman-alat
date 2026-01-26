@@ -196,9 +196,21 @@ class ItemService
      *
      * @param Alat $item
      * @return bool|null
+     * @throws \Exception
      */
     public function deleteItem(Alat $item): ?bool
     {
+        // Check for any borrowing relations (pending, dipinjam, selesai)
+        $hasRelations = DB::table('detail_peminjaman')
+            ->join('peminjaman', 'detail_peminjaman.peminjaman_id', '=', 'peminjaman.id')
+            ->where('detail_peminjaman.alat_id', $item->id)
+            ->whereIn('peminjaman.status', ['pending', 'dipinjam', 'selesai'])
+            ->exists();
+
+        if ($hasRelations) {
+            throw new \Exception("Alat tidak dapat dihapus karena memiliki relasi dengan data peminjaman (Pending, Dipinjam, atau Selesai).");
+        }
+
         // Delete the entire folder for this item
         Storage::disk('public')->deleteDirectory("items/{$item->id}");
 

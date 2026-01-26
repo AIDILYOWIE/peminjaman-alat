@@ -65,10 +65,14 @@ class ItemController extends Controller
 
     public function destroy(Alat $item)
     {
-        $this->itemService->deleteItem($item);
-
-        return redirect()->route('admin.items.index')
-            ->with('success', 'Alat berhasil dihapus.');
+        try {
+            $this->itemService->deleteItem($item);
+            return redirect()->route('admin.items.index')
+                ->with('success', 'Alat berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
     }
 
     public function import(Request $request)
