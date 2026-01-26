@@ -65,6 +65,19 @@
                     this.showDrawer = true;
                 },
 
+                buyNow(item) {
+                    const directData = {
+                        id: item.id,
+                        nama: item.nama,
+                        code: item.code,
+                        qty: 1,
+                        stock: item.stock,
+                        gambar: item.gambar
+                    };
+                    localStorage.setItem('direct_borrow', JSON.stringify(directData));
+                    window.location.href = "{{ route('user.borrow.checkout') }}";
+                },
+
                 remove(id) {
                     this.items = this.items.filter(i => i.id !== id);
                     this.save();
@@ -86,12 +99,12 @@
                 },
 
                 get totalItems() {
-                    return this.items.reduce((sum, item) => sum + item.qty, 0);
+                    return this.items.reduce((sum, item) => (sum + (item.qty || 0)), 0);
                 },
 
                 checkout() {
                     if (this.items.length === 0) return;
-                    window.location.href = '{{ route("user.borrow.checkout") }}';
+                    window.location.href = "{{ route('user.borrow.checkout') }}";
                 },
 
                 showToast(msg, type) {

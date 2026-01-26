@@ -8,10 +8,21 @@
     keterangan: '',
     selectedItem: null,
     isSubmitting: false,
+    isDirect: false,
     init() {
+        // 1. Check for Direct Borrow first (Exclusive)
+        const direct = localStorage.getItem('direct_borrow');
+        if (direct) {
+            this.basket = [JSON.parse(direct)];
+            this.isDirect = true;
+            return;
+        }
+
+        // 2. Otherwise use standard Basket
         const stored = localStorage.getItem('borrow_basket');
         if (stored) {
             this.basket = JSON.parse(stored);
+            this.isDirect = false;
         } else {
             window.location.href = '{{ route('user.borrow.index') }}';
         }
@@ -48,8 +59,14 @@
 
             const result = await response.json();
             if (result.success) {
-                localStorage.removeItem('borrow_basket');
-                Alpine.store('cart').items = [];
+                if (this.isDirect) {
+                    localStorage.removeItem('direct_borrow');
+                } else {
+                    localStorage.removeItem('borrow_basket');
+                    if (Alpine.store('cart')) {
+                        Alpine.store('cart').items = [];
+                    }
+                }
                 this.showToast(result.message, 'success');
                 setTimeout(() => {
                     window.location.href = result.redirect;
@@ -69,9 +86,13 @@
         this.save();
     },
     save() {
-        localStorage.setItem('borrow_basket', JSON.stringify(this.basket));
-        if (Alpine.store('cart')) {
-            Alpine.store('cart').items = JSON.parse(JSON.stringify(this.basket));
+        if (this.isDirect) {
+            localStorage.setItem('direct_borrow', JSON.stringify(this.basket[0]));
+        } else {
+            localStorage.setItem('borrow_basket', JSON.stringify(this.basket));
+            if (Alpine.store('cart')) {
+                Alpine.store('cart').items = JSON.parse(JSON.stringify(this.basket));
+            }
         }
     },
     showToast(msg, type) {

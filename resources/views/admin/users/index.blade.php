@@ -180,9 +180,6 @@
                             @error('password') <p class="mt-1 text-[10px] text-red-500">{{ $message }}</p> @enderror
                         </div>
                     </div>
-
-
-
                 </div>
             </form>
 

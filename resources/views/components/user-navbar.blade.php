@@ -12,7 +12,7 @@
     <nav class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 border-b border-gray-100">
         <!-- Top Header (Optional small text line) -->
         <div class="hidden lg:block bg-gray-50 border-b border-gray-100">
-            <div class="max-w-7xl auto px-4 sm:px-6 lg:px-8 py-1.5 flex justify-between items-center text-[11px] text-gray-500 font-medium">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex justify-between items-center text-[11px] text-gray-500 font-medium shutter-in-top">
                 <div class="flex gap-4">
                     <a href="#" class="hover:text-indigo-600">Tentang InventApp</a>
                     <a href="#" class="hover:text-indigo-600">Mitra InventApp</a>
